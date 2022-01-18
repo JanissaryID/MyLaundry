@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/my_nav"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.mylaundry.fragment.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_homeFragment_to_settingFragment"
+            app:destination="@id/settingFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_listMachine"
+            app:destination="@id/listMachine" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingFragment"
+        android:name="com.example.mylaundry.fragment.SettingFragment"
+        android:label="fragment_setting"
+        tools:layout="@layout/fragment_setting" >
+        <action
+            android:id="@+id/action_settingFragment_to_editFragment"
+            app:destination="@id/editFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/editFragment"
+        android:name="com.example.mylaundry.fragment.EditFragment"
+        android:label="fragment_edit"
+        tools:layout="@layout/fragment_edit" >
+        <argument
+            android:name="title"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="title" />
+        <argument
+            android:name="value"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="0" />
+        <argument
+            android:name="idSetting"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
+    <fragment
+        android:id="@+id/listMachine"
+        android:name="com.example.mylaundry.fragment.ListMachine"
+        android:label="fragment_list_machine"
+        tools:layout="@layout/fragment_list_machine" >
+        <argument
+            android:name="titleBar"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="Title" />
+        <argument
+            android:name="price"
+            app:argType="string"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_listMachine_to_qrisFragment"
+            app:destination="@id/qrisFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/qrisFragment"
+        android:name="com.example.mylaundry.fragment.QrisFragment"
+        android:label="fragment_qris"
+        tools:layout="@layout/fragment_qris" >
+        <argument
+            android:name="machine_type"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="machine_number"
+            app:argType="integer" />
+        <argument
+            android:name="price"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
+</navigation>

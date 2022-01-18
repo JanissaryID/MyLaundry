@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Laundry</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="TitleApp">Bubble Laundry</string>
+    <string name="TitleWasher">Washer</string>
+    <string name="Value_Machine_Washer">8 Machine</string>
+    <string name="availableTitle">Available</string>
+    <string name="Value_Machine_Dryer">12 Machine</string>
+    <string name="availableTitle1">Available</string>
+    <string name="dryerTitle">Dryer</string>
+</resources>
