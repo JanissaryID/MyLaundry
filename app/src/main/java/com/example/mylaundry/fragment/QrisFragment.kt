@@ -23,9 +23,14 @@ import com.example.mylaundry.api.RetrofitClient
 import com.example.mylaundry.api.payment.GetResponsePaymentAPI
 import com.example.mylaundry.room.dryermachine.Dryer
 import com.example.mylaundry.room.dryermachine.DryerViewModel
+import com.example.mylaundry.room.settings.SettingViewModel
+import com.example.mylaundry.room.settings.Settings
+import com.example.mylaundry.room.transactions.Transactions
+import com.example.mylaundry.room.transactions.TransactionsViewModel
 import com.example.mylaundry.room.washermachine.Washer
 import com.example.mylaundry.room.washermachine.WasherViewModel
-import com.example.mylaundry.socket.Socket
+import com.example.mylaundry.services.ForegroundServices
+import com.example.mylaundry.socket.SocketPrograming
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.*
@@ -36,6 +41,7 @@ import java.io.IOException
 import java.lang.Exception
 import java.net.*
 import java.nio.charset.StandardCharsets
+import java.text.SimpleDateFormat
 import java.util.*
 
 class QrisFragment : Fragment(), View.OnClickListener {
@@ -56,6 +62,8 @@ class QrisFragment : Fragment(), View.OnClickListener {
 
     private lateinit var mDryerViewModel : DryerViewModel
     private lateinit var mWasherViewModel : WasherViewModel
+    private lateinit var mTransactionsViewModel : TransactionsViewModel
+
     private lateinit var uiScope : CoroutineScope
 
 //    private lateinit var socket: Socket
@@ -66,6 +74,8 @@ class QrisFragment : Fragment(), View.OnClickListener {
     private var reffID : Long = 0
     private var successPayment : Boolean = false
     private var GenerateOK : Boolean = false
+
+    private var getData = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -101,8 +111,11 @@ class QrisFragment : Fragment(), View.OnClickListener {
 
         mDryerViewModel = ViewModelProvider(this).get(DryerViewModel::class.java)
         mWasherViewModel = ViewModelProvider(this).get(WasherViewModel::class.java)
+        mTransactionsViewModel = ViewModelProvider(this).get(TransactionsViewModel::class.java)
+
 
         coroutineResponseAPI()
+//        doBackDoor()
 
     }
 
@@ -355,9 +368,8 @@ class QrisFragment : Fragment(), View.OnClickListener {
         else{
             myData = "$HEADER$WASHER${Integer.toHexString((args.machineNumber))}${COMMAND[0]}$DATA"
         }
-        
+
         try{
-            val msg = "Hello"
             val group = InetAddress.getByName(IP_ADDRESS)
             val s = MulticastSocket(PORT)
             s.joinGroup(group)
@@ -367,10 +379,14 @@ class QrisFragment : Fragment(), View.OnClickListener {
                 group, PORT
             )
             s.send(hi)
-            val buf = ByteArray(1000)
+            val buf = ByteArray(8)
             val recv = DatagramPacket(buf, buf.size)
             s.receive(recv)
             s.leaveGroup(group)
+//            buClickValue = buClickValue.replace(".", "")
+            var getData = recv.data.decodeToString().length
+
+            Log.d("getdata", "Get Data � : " + getData)
         }
         catch (e : SocketException){
             Log.d("error", "error : " + e)
@@ -384,16 +400,45 @@ class QrisFragment : Fragment(), View.OnClickListener {
     }
 
     private fun doBackDoor(){
+        val socketsend = SocketPrograming(HomeFragment.ipvar, HomeFragment.portvar.toInt(),args.machineNumber,args.machineType.toString(), requireContext())
+
         uiScope.launch {
-            withContext(Dispatchers.IO) {
+            try{
+                withContext(Dispatchers.IO) {
+                    socketsend.createObjectMulticast()
+//                socket.multicastSend()
+                    socketsend.multicastSend()
+//                    while (!ForegroundServices.statConfrimActivation){
+//                        updateValueMachine(args.machineType!!, ListMachine.idMachine, ListMachine.number)
+//                        Log.d("services", "chek stat $ForegroundServices.statConfrimActivation")
+//                    }
+                    ForegroundServices.statConfrimActivation = false
 
-                MulticastSocketPrograming()
-
-                withContext(Dispatchers.Main){
-
+                    withContext(Dispatchers.Main){
+                        activity?.onBackPressed()
+                    }
                 }
             }
+            catch (e :Exception){
+                Log.d("error", "error : " + e)
+//                Toast.makeText(requireContext(), "$e", Toast.LENGTH_LONG).show()
+            }
         }
+    }
+
+    private fun addTransactions(){
+        val simpleDateFormat = SimpleDateFormat("dd-MM-yyyy")
+        val simpleTimeFormat = SimpleDateFormat("HH:mm:ss")
+        val currentDate: String = simpleDateFormat.format(Date())
+        val currentTime: String = simpleTimeFormat.format(Date())
+        val transactions = Transactions(
+            typeMachine = args.machineType.toString(),
+            noMachine = args.machineNumber,
+            date =currentDate,
+            timeMachine = currentTime,
+            priceMachine = args.price
+        )
+        mTransactionsViewModel.addTransactions(transactions)
     }
 
     override fun onClick(p0: View?) {
@@ -406,6 +451,7 @@ class QrisFragment : Fragment(), View.OnClickListener {
             R.id.ButtonOn -> {
 //                dataUDP()
                 doBackDoor()
+//                Toast.makeText(requireContext(), "Reveived Data : ${SocketPrograming.getData}" , Toast.LENGTH_SHORT).show()
 
 //                successPayment = false
 //                GenerateOK = false
@@ -420,6 +466,4 @@ class QrisFragment : Fragment(), View.OnClickListener {
             }
         }
     }
-
-
 }

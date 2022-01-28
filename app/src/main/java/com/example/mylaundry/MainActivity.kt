@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModelProvider
 import com.example.mylaundry.room.settings.SettingViewModel
 import com.example.mylaundry.room.settings.Settings
+import com.example.mylaundry.services.ForegroundServices
 import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
@@ -27,7 +28,6 @@ class MainActivity : AppCompatActivity() {
         catch (e:Exception){
             Log.d("check", e.toString())
         }
-
     }
 
     private fun insertData() {
