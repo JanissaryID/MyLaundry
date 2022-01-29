@@ -6,13 +6,12 @@ import android.util.Log
 import androidx.lifecycle.ViewModelProvider
 import com.example.mylaundry.room.settings.SettingViewModel
 import com.example.mylaundry.room.settings.Settings
-import com.example.mylaundry.services.ForegroundServices
 import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
 
-    val titleName = listOf<String>("Name laundry","Washer machine","Dryer machine","Washer price","Dryer price","Client ID","Key Client","Merchant ID","Password settings","IP address","IP port")
-    val valueName = listOf<Any>("Bubble Laundry",0,0,100,100,"bd273!@#-*(NDas","bd273!@#-*(NDasasdasd","210000000000000","admin","192.168.1.0","3000")
+    val titleName = listOf<String>("Name laundry","Washer price","Dryer price","Client ID","Key Client","Merchant ID","Password settings","IP address","IP port")
+    val valueName = listOf<Any>("Bubble Laundry",100,100,"bd273!@#-*(NDas","bd273!@#-*(NDasasdasd","210000000000000","admin","192.168.1.0","3000")
 
     private lateinit var mSettingViewModel : SettingViewModel
 
