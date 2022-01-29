@@ -1,4 +1,4 @@
-package com.example.mylaundry.api
+package com.example.mylaundry.api.qris
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

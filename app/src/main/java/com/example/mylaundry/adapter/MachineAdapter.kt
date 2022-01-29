@@ -5,43 +5,42 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mylaundry.R
-import com.example.mylaundry.fragment.HomeFragment
+import com.example.mylaundry.api.machine.ResponseMachine
 import com.example.mylaundry.fragment.ListMachine
-import com.example.mylaundry.room.dryermachine.Dryer
-import com.example.mylaundry.room.settings.Settings
 
-class DryerAdapter(private var listDryer: List<Dryer>, price: String): RecyclerView.Adapter<DryerAdapter.ListViewHolder>() {
+class MachineAdapter(private val listMachine: ArrayList<ResponseMachine>, price: String): RecyclerView.Adapter<MachineAdapter.ListViewHolder>() {
 
     private var selectedItem = -1
 
     private var priceMachine = price
 
-    inner class ListViewHolder(itemview : View) : RecyclerView.ViewHolder(itemview) {
-
-        var tvNumber: TextView = itemview.findViewById(R.id.NumberMachine)
-
+    inner class ListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        var tvNumber: TextView = itemView.findViewById(R.id.NumberMachine)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): MachineAdapter.ListViewHolder {
         val view: View = LayoutInflater.from(parent.context).inflate(R.layout.list_item_machine, parent, false)
         return ListViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
-        val dryer = listDryer[position]
+    override fun onBindViewHolder(holder: MachineAdapter.ListViewHolder, position: Int) {
+        val dryer = listMachine[position]
 
-        if(dryer.isActive == true){
+        if(dryer.machineStatus == true){
             holder.tvNumber.text = "On"
             holder.tvNumber.setTextColor(Color.WHITE)
             holder.tvNumber.setBackgroundResource(R.drawable.machine_running)
             holder.tvNumber.isEnabled = false
         }
         else{
-            holder.tvNumber.text = dryer.numberMachine.toString()
+            holder.tvNumber.text = dryer.machineNumber.toString()
 
             ListMachine.statButton = false
             holder.tvNumber.setBackgroundResource(R.drawable.header_layout)
@@ -57,7 +56,7 @@ class DryerAdapter(private var listDryer: List<Dryer>, price: String): RecyclerV
 
         holder.itemView.setOnClickListener{
 //            Toast.makeText(holder.itemView.context, "Kamu memilih Dryer machine nomor " + listDryer[position].numberMachine, Toast.LENGTH_SHORT).show()
-            if(dryer.isActive == false){
+            if(dryer.machineStatus == false){
                 val previousItem = selectedItem
                 selectedItem = position
 
@@ -66,10 +65,10 @@ class DryerAdapter(private var listDryer: List<Dryer>, price: String): RecyclerV
                 ListMachine.statButton = true
 
                 val home = ListMachine()
-                home.buttonStat(ListMachine.buttonCheckout, priceMachine)
+                home.buttonStat(ListMachine.buttonCheckoutMachine, priceMachine)
 
-                ListMachine.idMachine = listDryer[position].idDryer!!
-                ListMachine.number = listDryer[position].numberMachine!!
+                ListMachine.idMachine = listMachine[position].machineId!!
+                ListMachine.number = listMachine[position].machineNumber!!
 
                 Log.d("checkButton", ListMachine.statButton.toString())
             }
@@ -77,13 +76,5 @@ class DryerAdapter(private var listDryer: List<Dryer>, price: String): RecyclerV
         }
     }
 
-    override fun getItemCount(): Int {
-        return listDryer.size
-    }
-
-    fun setData(dryer: List<Dryer>){
-        this.listDryer = dryer
-        notifyDataSetChanged()
-    }
-
+    override fun getItemCount(): Int = listMachine.size
 }

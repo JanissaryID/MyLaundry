@@ -16,19 +16,17 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import com.example.mylaundry.R
-import com.example.mylaundry.api.generate.GetResponseAPI
-import com.example.mylaundry.api.payment.ResponsePaymentAPI
-import com.example.mylaundry.api.generate.ResponseAPI
-import com.example.mylaundry.api.RetrofitClient
+import com.example.mylaundry.api.qris.generate.GetResponseAPI
+import com.example.mylaundry.api.qris.payment.ResponsePaymentAPI
+import com.example.mylaundry.api.qris.generate.ResponseAPI
+import com.example.mylaundry.api.qris.RetrofitClient
 import com.example.mylaundry.api.payment.GetResponsePaymentAPI
-import com.example.mylaundry.room.dryermachine.Dryer
-import com.example.mylaundry.room.dryermachine.DryerViewModel
-import com.example.mylaundry.room.settings.SettingViewModel
-import com.example.mylaundry.room.settings.Settings
+//import com.example.mylaundry.room.dryermachine.Dryer
+//import com.example.mylaundry.room.dryermachine.DryerViewModel
 import com.example.mylaundry.room.transactions.Transactions
 import com.example.mylaundry.room.transactions.TransactionsViewModel
-import com.example.mylaundry.room.washermachine.Washer
-import com.example.mylaundry.room.washermachine.WasherViewModel
+//import com.example.mylaundry.room.washermachine.Washer
+//import com.example.mylaundry.room.washermachine.WasherViewModel
 import com.example.mylaundry.services.ForegroundServices
 import com.example.mylaundry.socket.SocketPrograming
 import com.google.zxing.BarcodeFormat
@@ -60,8 +58,8 @@ class QrisFragment : Fragment(), View.OnClickListener {
 
     private lateinit var CheckImage : ImageView
 
-    private lateinit var mDryerViewModel : DryerViewModel
-    private lateinit var mWasherViewModel : WasherViewModel
+//    private lateinit var mDryerViewModel : DryerViewModel
+//    private lateinit var mWasherViewModel : WasherViewModel
     private lateinit var mTransactionsViewModel : TransactionsViewModel
 
     private lateinit var uiScope : CoroutineScope
@@ -109,8 +107,8 @@ class QrisFragment : Fragment(), View.OnClickListener {
         titleMachine = view.findViewById(R.id.TitleMachineLaundry)
         titleMachine.text = "${args.machineType} : ${args.machineNumber}"
 
-        mDryerViewModel = ViewModelProvider(this).get(DryerViewModel::class.java)
-        mWasherViewModel = ViewModelProvider(this).get(WasherViewModel::class.java)
+//        mDryerViewModel = ViewModelProvider(this).get(DryerViewModel::class.java)
+//        mWasherViewModel = ViewModelProvider(this).get(WasherViewModel::class.java)
         mTransactionsViewModel = ViewModelProvider(this).get(TransactionsViewModel::class.java)
 
 
@@ -329,19 +327,19 @@ class QrisFragment : Fragment(), View.OnClickListener {
         QRImage.setImageBitmap(bitmap)
     }
 
-    private fun updateValueMachine(machine:String,id: Int, number : Int){
-//        Log.d("checktitle", "Check title " + machine)
-        val separate = machine.split(" ")[0]
-//        Log.d("checktitle", "Check title " + separate)
-        if(separate == "Washer"){
-            val updatedvalue = Washer(id,number,true)
-            mWasherViewModel.updateWasher(updatedvalue)
-        }
-        else{
-            val updatedvalue = Dryer(id,number,true)
-            mDryerViewModel.updateDryer(updatedvalue)
-        }
-    }
+//    private fun updateValueMachine(machine:String,id: Int, number : Int){
+////        Log.d("checktitle", "Check title " + machine)
+//        val separate = machine.split(" ")[0]
+////        Log.d("checktitle", "Check title " + separate)
+//        if(separate == "Washer"){
+//            val updatedvalue = Washer(id,number,true)
+//            mWasherViewModel.updateWasher(updatedvalue)
+//        }
+//        else{
+//            val updatedvalue = Dryer(id,number,true)
+//            mDryerViewModel.updateDryer(updatedvalue)
+//        }
+//    }
 
     override fun onStop() {
         super.onStop()

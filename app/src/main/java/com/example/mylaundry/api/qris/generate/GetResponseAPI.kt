@@ -1,4 +1,4 @@
-package com.example.mylaundry.api.generate
+package com.example.mylaundry.api.qris.generate
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName

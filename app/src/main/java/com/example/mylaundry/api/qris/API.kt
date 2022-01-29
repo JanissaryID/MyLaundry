@@ -1,9 +1,9 @@
-package com.example.mylaundry.api
+package com.example.mylaundry.api.qris
 
-import com.example.mylaundry.api.generate.GetResponseAPI
-import com.example.mylaundry.api.generate.ResponseAPI
+import com.example.mylaundry.api.qris.generate.GetResponseAPI
+import com.example.mylaundry.api.qris.generate.ResponseAPI
 import com.example.mylaundry.api.payment.GetResponsePaymentAPI
-import com.example.mylaundry.api.payment.ResponsePaymentAPI
+import com.example.mylaundry.api.qris.payment.ResponsePaymentAPI
 import retrofit2.Call
 import retrofit2.http.*
 

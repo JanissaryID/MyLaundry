@@ -63,6 +63,9 @@
         <action
             android:id="@+id/action_listMachine_to_qrisFragment"
             app:destination="@id/qrisFragment" />
+        <argument
+            android:name="typeMachine"
+            app:argType="integer" />
     </fragment>
     <fragment
         android:id="@+id/qrisFragment"

@@ -1,6 +1,5 @@
 package com.example.mylaundry.fragment
 
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -10,20 +9,20 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mylaundry.R
-import com.example.mylaundry.adapter.DryerAdapter
-import com.example.mylaundry.adapter.WasherAdapter
-import com.example.mylaundry.room.dryermachine.Dryer
-import com.example.mylaundry.room.dryermachine.DryerViewModel
-import com.example.mylaundry.room.washermachine.Washer
-import com.example.mylaundry.room.washermachine.WasherViewModel
+import com.example.mylaundry.adapter.MachineAdapter
+import com.example.mylaundry.api.machine.ResponseMachine
+import com.example.mylaundry.api.machine.RetrofitClient
+import kotlinx.android.synthetic.main.fragment_list_machine.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ListMachine : Fragment(), View.OnClickListener {
 
@@ -33,21 +32,27 @@ class ListMachine : Fragment(), View.OnClickListener {
     private lateinit var titleList : TextView
     private lateinit var emptyTextMachine : TextView
 
-    private lateinit var rvMachine: RecyclerView
+//    lateinit var buttonCheckout : Button
 
-    private lateinit var mDryerViewModel : DryerViewModel
-    private lateinit var mWasherViewModel : WasherViewModel
+//    private lateinit var rvMachine: RecyclerView
 
-    private val listDryer = emptyList<Dryer>()
-    private val listWasher = emptyList<Washer>()
+
 
     private var priceMachine : String = "0"
 
     companion object{
         var statButton: Boolean = false
-        lateinit var buttonCheckout : Button
+        lateinit var buttonCheckoutMachine : Button
         var number : Int = 0
         var idMachine : Int = 0
+
+        val listMachine = ArrayList<ResponseMachine>()
+        val listDryer = ArrayList<ResponseMachine>()
+        val listWasher = ArrayList<ResponseMachine>()
+        val listDryerUse = ArrayList<ResponseMachine>()
+        val listWasherUse = ArrayList<ResponseMachine>()
+
+        lateinit var rvMachineall: RecyclerView
     }
 
     override fun onCreateView(
@@ -64,24 +69,25 @@ class ListMachine : Fragment(), View.OnClickListener {
         BtnBack = view.findViewById(R.id.ButtonBackList)
         titleList = view.findViewById(R.id.TitleList)
         emptyTextMachine = view.findViewById(R.id.EmptyText)
-        buttonCheckout = view.findViewById(R.id.buttonCheckout)
+        buttonCheckoutMachine = view.findViewById(R.id.buttonCheckout)
 
-        rvMachine = view.findViewById(R.id.rvMachine)
-        rvMachine.setHasFixedSize(true)
+        rvMachineall = view.findViewById(R.id.rvMachine)
+
 
         BtnBack.setOnClickListener(this)
         buttonCheckout.setOnClickListener(this)
 
         titleList.text = args.titleBar
 
-        mDryerViewModel = ViewModelProvider(this).get(DryerViewModel::class.java)
-        mWasherViewModel = ViewModelProvider(this).get(WasherViewModel::class.java)
-
         buttonCheckout.isEnabled =false
         buttonCheckout.setBackgroundResource(R.drawable.gray_button)
 
-        showListMachine()
+        showLoading(true)
+
+        getdataMachine()
         buttonStat(buttonCheckout,"0")
+
+        emptyTextMachine.isVisible = false
     }
 
     fun buttonStat(button: Button, price: String) {
@@ -99,17 +105,7 @@ class ListMachine : Fragment(), View.OnClickListener {
     }
 
     private fun showEmptyTextWasher() {
-        if(HomeFragment.washerMachine > 0){
-            emptyTextMachine.isVisible = false
-        }
-        else{
-            emptyTextMachine.text = "Washer machine is empty"
-            emptyTextMachine.isVisible = true
-        }
-    }
-
-    private fun showEmptyTextDryer() {
-        if(HomeFragment.dryerMachine > 0){
+        if(listWasher != null){
             emptyTextMachine.isVisible = false
         }
         else{
@@ -118,34 +114,48 @@ class ListMachine : Fragment(), View.OnClickListener {
         }
     }
 
-    fun showListMachine() {
-//        Log.d("checktitle", "Check Get title " + args.titleBar)
-        val title = args.titleBar
-        val separate = title!!.split(" ")[0]
-//        Log.d("checktitle", "Check title " + separate)
-//        Log.d("checktitle", "Check title " + separate.length)
+    private fun showEmptyTextDryer() {
+        if(listDryer != null){
+            emptyTextMachine.isVisible = false
+        }
+        else{
+            emptyTextMachine.text = "Dryer machine is empty"
+            emptyTextMachine.isVisible = true
+        }
+    }
 
-        if(separate == "Washer"){
-            val adapter = WasherAdapter(listWasher, args.price.toString())
-            rvMachine.layoutManager = GridLayoutManager(requireContext(), 3)
+    private fun getdataMachine()
+    {
+        rvMachineall.setHasFixedSize(true)
+        rvMachineall.layoutManager = GridLayoutManager(requireContext(), 3)
+//        showLoading(true)
+        if(args.typeMachine == 0){
+            val adapter = MachineAdapter(listWasher, args.price.toString())
             rvMachine.adapter = adapter
 
-            mWasherViewModel.readAllData.observe(viewLifecycleOwner, Observer { washer ->
-                adapter.setData(washer)
-            })
-            showEmptyTextWasher()
+            if (listWasher != null) {
+                showEmptyTextWasher()
+                showLoading(false)
+            } else {
+                showEmptyTextDryer()
+                showLoading(true)
+            }
         }
-        else if(separate == "Dryer"){
-            val adapter = DryerAdapter(listDryer, args.price.toString())
-            rvMachine.layoutManager = GridLayoutManager(requireContext(), 3)
+        else{
+//            showLoading(true)
+            val adapter = MachineAdapter(listDryer, args.price.toString())
             rvMachine.adapter = adapter
 
-            mDryerViewModel.readAllData.observe(viewLifecycleOwner, Observer { dryer ->
-                adapter.setData(dryer)
-            })
-            showEmptyTextDryer()
+            if (listDryer != null) {
+                showEmptyTextDryer()
+                showLoading(false)
+            } else {
+                showLoading(true)
+            }
         }
-
+//        rvMachine.layoutManager = GridLayoutManager(requireContext(), 3)
+//        rvMachine.adapter = adapter
+//        rvMachine.setHasFixedSize(true)
     }
 
     private fun ContainsDot(price : String): Int {
@@ -178,6 +188,8 @@ class ListMachine : Fragment(), View.OnClickListener {
     override fun onClick(p0: View?) {
         when(p0!!.id){
             R.id.ButtonBackList -> {
+//                listWasher.clear()
+//                listDryer.clear()
                 activity?.onBackPressed()
             }
             R.id.buttonCheckout -> {
@@ -191,16 +203,32 @@ class ListMachine : Fragment(), View.OnClickListener {
 //                Log.d("checkrefid", "Check Price Home " + HomeFragment.priceWasher)
 
                 if (separate1 == "Washer"){
+
+                    val adapterWasher = MachineAdapter(listWasher, args.price.toString())
+                    rvMachine.adapter = adapterWasher
+
                     val pricemachineWasher = ContainsDot(HomeFragment.priceWasher)
                     val action = ListMachineDirections.actionListMachineToQrisFragment(args.titleBar.toString(),number,pricemachineWasher)
                     Navigation.findNavController(p0).navigate(action)
                 }
                 else if (separate1 == "Dryer"){
+
+                    val adapterDryer = MachineAdapter(listDryer, args.price.toString())
+                    rvMachine.adapter = adapterDryer
+
                     val pricemachineDryer = ContainsDot(HomeFragment.priceDryer)
                     val action = ListMachineDirections.actionListMachineToQrisFragment(args.titleBar.toString(),number,pricemachineDryer)
                     Navigation.findNavController(p0).navigate(action)
                 }
             }
+        }
+    }
+
+    private fun showLoading(state: Boolean) {
+        if (state) {
+            progressbar.visibility = View.VISIBLE
+        } else {
+            progressbar.visibility = View.GONE
         }
     }
 }

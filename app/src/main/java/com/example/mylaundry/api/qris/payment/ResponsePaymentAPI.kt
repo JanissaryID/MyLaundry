@@ -1,4 +1,4 @@
-package com.example.mylaundry.api.payment
+package com.example.mylaundry.api.qris.payment
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName

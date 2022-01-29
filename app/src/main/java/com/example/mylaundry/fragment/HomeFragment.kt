@@ -20,18 +20,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.example.mylaundry.R
-import com.example.mylaundry.excel.ExportToExcel
-import com.example.mylaundry.room.dryermachine.Dryer
-import com.example.mylaundry.room.dryermachine.DryerDatabaseGet
-import com.example.mylaundry.room.dryermachine.DryerViewModel
 import com.example.mylaundry.room.settings.SettingDatabaseGet
 import com.example.mylaundry.room.settings.Settings
 import com.example.mylaundry.room.transactions.Transactions
 import com.example.mylaundry.room.transactions.TransactionsDatabaseGet
-import com.example.mylaundry.room.washermachine.Washer
-import com.example.mylaundry.room.washermachine.WasherDatabaseGet
-import com.example.mylaundry.room.washermachine.WasherViewModel
-import com.example.mylaundry.socket.SocketPrograming
 import kotlinx.coroutines.*
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.Cell
@@ -52,7 +44,10 @@ import androidx.core.app.ActivityCompat
 
 import android.content.pm.PackageManager
 import android.os.Build.VERSION_CODES.Q
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.mylaundry.api.machine.ResponseMachine
+import com.example.mylaundry.api.machine.RetrofitClient
 import com.example.mylaundry.services.ForegroundServices
 import com.google.ar.core.Config
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -64,11 +59,9 @@ import org.apache.poi.hssf.usermodel.HSSFRow
 
 import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFSheet
-
-
-
-
-
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 class HomeFragment : Fragment(), View.OnClickListener {
@@ -93,8 +86,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
     private lateinit var buttonService : Button
 
     private lateinit var db: SettingDatabaseGet
-    private lateinit var washerdb: WasherDatabaseGet
-    private lateinit var dryerdb: DryerDatabaseGet
     private lateinit var dbTransactions: TransactionsDatabaseGet
 
     private lateinit var dataExcel: List<Transactions>
@@ -126,9 +117,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     private val filePath: File = File(Environment.getExternalStorageDirectory().toString() + "/Demo.xls")
 
-    private lateinit var mDryerViewModel : DryerViewModel
-    private lateinit var mWasherViewModel : WasherViewModel
-//
 //    private val listSettings = emptyList<Settings>()
 
     override fun onCreateView(
@@ -148,12 +136,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
         System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
 
         db = Room.databaseBuilder(requireContext(), SettingDatabaseGet::class.java, "LaundryDatabase").build()
-        washerdb = Room.databaseBuilder(requireContext(), WasherDatabaseGet::class.java, "WasherDatabase").build()
-        dryerdb = Room.databaseBuilder(requireContext(), DryerDatabaseGet::class.java, "DryerDatabase").build()
         dbTransactions = Room.databaseBuilder(requireContext(), TransactionsDatabaseGet::class.java, "TransactionDatabase").build()
-
-        mDryerViewModel = ViewModelProvider(this).get(DryerViewModel::class.java)
-        mWasherViewModel = ViewModelProvider(this).get(WasherViewModel::class.java)
 
         BtnSetting = view.findViewById(R.id.imageButton)
         BtnSetting.setOnClickListener(this)
@@ -185,10 +168,8 @@ class HomeFragment : Fragment(), View.OnClickListener {
         AvailableOK = false
 
         askPermision()
-
-
-
-//        loadData(true)
+        viewUI(false)
+        getdataMachine()
 
     }
 
@@ -208,6 +189,53 @@ class HomeFragment : Fragment(), View.OnClickListener {
         }
     }
 
+    private fun getdataMachine()
+    {
+        ListMachine.listWasher.clear()
+        ListMachine.listDryer.clear()
+        ListMachine.listMachine.clear()
+        ListMachine.listDryerUse.clear()
+        ListMachine.listWasherUse.clear()
+
+        RetrofitClient.instance.getMachine().enqueue(object : Callback<List<ResponseMachine>> {
+            override fun onResponse(call: Call<List<ResponseMachine>>, response: Response<List<ResponseMachine>>) {
+                Log.d("retrofit", "Code : ${response.code().toString()}")
+//                Log.d("retrofit", "Code : ${response.body().toString()}")
+                response.body()?.let {
+                    ListMachine.listMachine.addAll(it)
+                }
+
+                for (a in ListMachine.listMachine){
+                    if (a.machineType == 0){
+                        ListMachine.listWasher.add(a)
+
+                        if (a.machineStatus == true){
+                            ListMachine.listWasherUse.add(a)
+                        }
+                    }
+                    else{
+                        ListMachine.listDryer.add(a)
+                        if (a.machineStatus == true){
+                            ListMachine.listDryerUse.add(a)
+                        }
+                    }
+                    Log.d("retrofit", "Code : ${a.machineType}")
+                    Log.d("retrofit", "Code : ${a}")
+                }
+                viewUI(true)
+
+            }
+
+            override fun onFailure(call: Call<List<ResponseMachine>>, t: Throwable) {
+                Log.d("p2", t.message.toString())
+                if (t.message == t.message){
+                    Toast.makeText(requireContext(), "Tidak ada koneksi Internet" , Toast.LENGTH_SHORT).show()
+                }
+            }
+
+        })
+    }
+
     private fun viewUI(stat:Boolean){
         titleLaundryHomeTv.text = nameStorevar
         if(!stat){
@@ -225,19 +253,15 @@ class HomeFragment : Fragment(), View.OnClickListener {
             DryerMachineAvailabe.isVisible = true
             progressWasher.isVisible = false
             progressDryer.isVisible = false
-            WasherMachineAvailabe.text = "${washerMachine-washerMachineUsed} Machine"
-            DryerMachineAvailabe.text = "${dryerMachine-dryerMachineUsed} Machine"
+            WasherMachineAvailabe.text = "${ListMachine.listWasher.size-ListMachine.listWasherUse.size} Machine"
+            DryerMachineAvailabe.text = "${ListMachine.listDryer.size-ListMachine.listDryerUse.size} Machine"
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStart() {
         super.onStart()
-//        getDataMachine()
-//        loadData2()
         loadData(true)
-        ForegroundServices.startService(requireContext(), "Laundry service is running")
-//        loadData3()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -250,9 +274,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 try {
                     if (statInsert){
                         getDataMachine()
-                        insertDataDryer()
-                        insertDataWasher()
-                        getDatamachineAvailable()
                         dataExcel = dbTransactions.dataDao().getAllData()
                         Log.d("run", "Routine")
                     }
@@ -265,81 +286,22 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     Log.d("check", e.toString())
                 }
                 withContext(Dispatchers.Main){
-
-                    Log.d("check", "While ON")
-                    Log.d("check", "statOK $statOK")
-                    Log.d("check", "washOK $washOK")
-                    Log.d("check", "dryerOK $dryerOK")
-                    Log.d("check", "Available $AvailableOK")
-                    if (statOK && washOK && dryerOK && AvailableOK){
-                        viewUI(true)
-                    }
-                    else{
-                        viewUI(false)
-                    }
-                    Log.d("check", "While OFF")
+                      titleLaundryHomeTv.text = nameStorevar
+//                    Log.d("check", "While ON")
+//                    Log.d("check", "statOK $statOK")
+//                    Log.d("check", "washOK $washOK")
+//                    Log.d("check", "dryerOK $dryerOK")
+//                    Log.d("check", "Available $AvailableOK")
+//                    if (statOK && washOK && dryerOK && AvailableOK){
+//                        viewUI(true)
+//                    }
+//                    else{
+//                        viewUI(false)
+//                    }
+//                    Log.d("check", "While OFF")
                 }
             }
         }
-    }
-
-//    @RequiresApi(Build.VERSION_CODES.O)
-//    fun loadData2(){
-//        GlobalScope.launch {
-//            try {
-//                if (SocketPrograming.statGetData){
-//                    Log.d("getdata", "Get Data Service � : ${SocketPrograming.getData}")
-//                    Toast.makeText(requireContext(), "Received Data : ${SocketPrograming.getData}" , Toast.LENGTH_SHORT).show()
-//                }
-//            }
-//            catch (e: Exception){
-//                Log.d("check", e.toString())
-//            }
-//        }
-//        viewUI(true)
-//    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun loadData3(){
-        try {
-            getDataMachine()
-            insertDataDryer()
-            insertDataWasher()
-            Log.d("run", "Routine")
-        }
-        catch (e: Exception){
-            Log.d("check", e.toString())
-        }
-    }
-
-    private fun getDatamachineAvailable(){
-        washerMachineUsed = 0
-        dryerMachineUsed = 0
-
-        val dataWasherAvailable: List<Washer> = washerdb.dataDao().getAllData()
-        val dataDryerAvailable: List<Dryer> = dryerdb.dataDao().getAllData()
-
-        for (valuewasher in dataWasherAvailable){
-            if(valuewasher.isActive == true){
-                washerMachineUsed++
-            }
-        }
-
-        for (valuedryer in dataDryerAvailable){
-            if(valuedryer.isActive == true){
-                dryerMachineUsed++
-            }
-        }
-
-        Log.d("checkget", "Check Get Washer " + washerMachine)
-        Log.d("checkget", "Check Get Washer Used " + washerMachineUsed)
-
-        Log.d("checkget", "Check Get Dryer " + dryerMachine)
-        Log.d("checkget", "Check Get Dryer Used " + dryerMachineUsed)
-
-
-        AvailableOK = true
-
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -406,30 +368,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
         }
         statOK = true
 
-    }
-
-    fun insertDataDryer() {
-        Log.d("check", "Show DryerMachine " + dryerMachine.toString())
-        if(dryerMachine > 0){
-            for (i in 1..dryerMachine){
-                val dryer = Dryer(i-1, i, false)
-//                Log.d("check", i.toString() + "     " + (i+1).toString())
-                mDryerViewModel.addDryer(dryer)
-            }
-        }
-        dryerOK = true
-    }
-
-    fun insertDataWasher() {
-        Log.d("check", "Show WasherMachine " + washerMachine.toString())
-        if(washerMachine > 0){
-            for (i in 1..washerMachine){
-                val washer = Washer(i-1, i, false)
-//                Log.d("check", i.toString() + "     " + (i+1).toString())
-                mWasherViewModel.addWasher(washer)
-            }
-        }
-        washOK = true
     }
 
     fun createXlFile() {
@@ -620,11 +558,11 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 findNavController().navigate(R.id.action_homeFragment_to_settingFragment)
             }
             R.id.CardWasher -> {
-                val action = HomeFragmentDirections.actionHomeFragmentToListMachine("Washer Machine", priceWasher)
+                val action = HomeFragmentDirections.actionHomeFragmentToListMachine("Washer Machine", priceWasher,0)
                 Navigation.findNavController(p0).navigate(action)
             }
             R.id.CardDryer -> {
-                val action = HomeFragmentDirections.actionHomeFragmentToListMachine("Dryer Machine", priceDryer)
+                val action = HomeFragmentDirections.actionHomeFragmentToListMachine("Dryer Machine", priceDryer, 1)
                 Navigation.findNavController(p0).navigate(action)
             }
             R.id.btnService -> {

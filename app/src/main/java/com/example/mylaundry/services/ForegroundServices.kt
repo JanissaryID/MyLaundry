@@ -17,12 +17,12 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.example.mylaundry.MainActivity
 import com.example.mylaundry.R
-import com.example.mylaundry.room.dryermachine.Dryer
-import com.example.mylaundry.room.dryermachine.DryerDao
-import com.example.mylaundry.room.dryermachine.DryerDatabase
-import com.example.mylaundry.room.washermachine.Washer
-import com.example.mylaundry.room.washermachine.WasherDao
-import com.example.mylaundry.room.washermachine.WasherDatabase
+//import com.example.mylaundry.room.dryermachine.Dryer
+//import com.example.mylaundry.room.dryermachine.DryerDao
+//import com.example.mylaundry.room.dryermachine.DryerDatabase
+//import com.example.mylaundry.room.washermachine.Washer
+//import com.example.mylaundry.room.washermachine.WasherDao
+//import com.example.mylaundry.room.washermachine.WasherDatabase
 import com.example.mylaundry.socket.SocketPrograming
 import kotlinx.coroutines.*
 import java.lang.Thread.sleep
@@ -32,8 +32,8 @@ class ForegroundServices() : Service() {
 
     private lateinit var uiScope : CoroutineScope
 
-    private lateinit var daoWasher : WasherDao
-    private lateinit var daoDryer : DryerDao
+//    private lateinit var daoWasher : WasherDao
+//    private lateinit var daoDryer : DryerDao
 
     private var COMMANDSEND = 0x07
     private var DATA = 0x01
@@ -178,32 +178,32 @@ class ForegroundServices() : Service() {
         }).start()
     }
 
-    fun updateMachine(typeMachine : Int, numberMachine : Int, statMachine : Boolean){
-        try {
-            Log.d("dao", "Update")
-            Log.d("dao", "Update id ${(numberMachine-1)}")
-            Log.d("dao", "Update Number ${numberMachine}")
-            if (typeMachine == 1){
-                val updateWasher = Washer((numberMachine-1), numberMachine, statMachine)
-                Thread{
-                    daoWasher = WasherDatabase.getDatabase(application).washerDao()
-                    daoWasher.updateValueWasher(updateWasher)
-                    Log.d("dao", "OK")
-                }.start()
-            }
-            else{
-                val updateDryer = Dryer((numberMachine-1), numberMachine, statMachine)
-                Thread{
-                    daoDryer = DryerDatabase.getDatabase(application).dryerDao()
-                    daoDryer.updateValueDryer(updateDryer)
-                    Log.d("dao", "OK")
-                }.start()
-            }
-        }
-        catch (e : Exception){
-            Log.d("error", "Error $e")
-        }
-    }
+//    fun updateMachine(typeMachine : Int, numberMachine : Int, statMachine : Boolean){
+//        try {
+//            Log.d("dao", "Update")
+//            Log.d("dao", "Update id ${(numberMachine-1)}")
+//            Log.d("dao", "Update Number ${numberMachine}")
+//            if (typeMachine == 1){
+//                val updateWasher = Washer((numberMachine-1), numberMachine, statMachine)
+//                Thread{
+//                    daoWasher = WasherDatabase.getDatabase(application).washerDao()
+//                    daoWasher.updateValueWasher(updateWasher)
+//                    Log.d("dao", "OK")
+//                }.start()
+//            }
+//            else{
+//                val updateDryer = Dryer((numberMachine-1), numberMachine, statMachine)
+//                Thread{
+//                    daoDryer = DryerDatabase.getDatabase(application).dryerDao()
+//                    daoDryer.updateValueDryer(updateDryer)
+//                    Log.d("dao", "OK")
+//                }.start()
+//            }
+//        }
+//        catch (e : Exception){
+//            Log.d("error", "Error $e")
+//        }
+//    }
 
     private fun wifiManagerBlock(){
         val manager = getSystemService(WIFI_SERVICE) as WifiManager

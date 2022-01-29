@@ -14,11 +14,8 @@ import com.example.mylaundry.R
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModelProvider
-import com.example.mylaundry.room.dryermachine.Dryer
-import com.example.mylaundry.room.dryermachine.DryerViewModel
 import com.example.mylaundry.room.settings.SettingViewModel
 import com.example.mylaundry.room.settings.Settings
-import com.example.mylaundry.room.washermachine.WasherViewModel
 import me.abhinay.input.CurrencyEditText
 import java.lang.Exception
 import java.util.*
@@ -29,8 +26,6 @@ class EditFragment : Fragment(), View.OnClickListener {
     private val args : EditFragmentArgs by navArgs()
 
     private lateinit var mSettingViewModel : SettingViewModel
-    private lateinit var mDryerViewModel : DryerViewModel
-    private lateinit var mWasherViewModel : WasherViewModel
 
     private lateinit var BtnBack : ImageButton
     private lateinit var titleEdit : TextView
@@ -81,8 +76,6 @@ class EditFragment : Fragment(), View.OnClickListener {
         ButtonSave.setOnClickListener(this)
 
         mSettingViewModel = ViewModelProvider(this).get(SettingViewModel::class.java)
-        mDryerViewModel = ViewModelProvider(this).get(DryerViewModel::class.java)
-        mWasherViewModel = ViewModelProvider(this).get(WasherViewModel::class.java)
 
         titleEdit.text = args.title
         checkTitle()
@@ -101,13 +94,11 @@ class EditFragment : Fragment(), View.OnClickListener {
                     Log.d("check", "check title " + titleMachine)
                     if(args.title.toString()=="Washer machine"){
                         updateValue(getvalueMachine.toString(), titleMachine)
-                        mWasherViewModel.delete()
-                        home.insertDataWasher()
+//                        home.insertDataWasher()
                     }
                     else{
                         updateValue(getvalueMachine.toString(), titleMachine)
-                        mDryerViewModel.delete()
-                        home.insertDataWasher()
+//                        home.insertDataWasher()
                     }
                 }
                 catch (e: Exception){
@@ -219,15 +210,15 @@ class EditFragment : Fragment(), View.OnClickListener {
         }
     }
 
-    private fun insertData() {
-        Log.d("check", "Show DryerMachine " + getvalueMachine.toString())
-        for (i in 1..getvalueMachine){
-            val dryer = Dryer(i-1, i, false)
-            Log.d("check", (i-1).toString() + "     " + (i).toString())
-            mDryerViewModel.addDryer(dryer)
-        }
-//        finishStat = true
-    }
+//    private fun insertData() {
+//        Log.d("check", "Show DryerMachine " + getvalueMachine.toString())
+//        for (i in 1..getvalueMachine){
+//            val dryer = Dryer(i-1, i, false)
+//            Log.d("check", (i-1).toString() + "     " + (i).toString())
+//            mDryerViewModel.addDryer(dryer)
+//        }
+////        finishStat = true
+//    }
 
     private fun updateValue(value: String, title : String){
         val updatedvalue = Settings(args.idSetting,title,value)
