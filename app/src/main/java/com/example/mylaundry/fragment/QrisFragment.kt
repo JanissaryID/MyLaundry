@@ -25,6 +25,8 @@ import com.example.mylaundry.api.qris.payment.ResponsePaymentAPI
 import com.example.mylaundry.api.qris.generate.ResponseAPI
 import com.example.mylaundry.api.qris.RetrofitClient
 import com.example.mylaundry.api.payment.GetResponsePaymentAPI
+import com.example.mylaundry.api.transactions.ResponseTransactions
+import com.example.mylaundry.api.transactions.RetrofitClientTransactions
 import com.example.mylaundry.room.transactions.Transactions
 import com.example.mylaundry.room.transactions.TransactionsViewModel
 import com.google.zxing.BarcodeFormat
@@ -38,6 +40,8 @@ import java.lang.Exception
 import java.net.*
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class QrisFragment : Fragment(), View.OnClickListener {
@@ -250,16 +254,6 @@ class QrisFragment : Fragment(), View.OnClickListener {
         var mIDstring = String(decmID)
 
         val QRParameter = ResponseAPI(mIDstring,args.price,0,randomReff,"https://webhook.site/73121a4e-5dd9-423d-980b-0ace6c719b90",5)
-//        val QRParameter = ResponseAPI("210910003000000",args.price,0,randomReff,"https://webhook.site/73121a4e-5dd9-423d-980b-0ace6c719b90",5)
-
-
-
-//        Log.d("checksplit", "ID : $cID")
-//        Log.d("checksplit", "SK : $cSK")
-//        Log.d("checksplit", "mID : $mID")
-//        Log.d("checksplit", "dec ID : $cIDstring")
-//        Log.d("checksplit", "dec SK : $cSKstring")
-//        Log.d("checksplit", "dec mID : $mIDstring")
 
         val code = "${cIDstring}:${cSKstring}:${mIDstring}"
 //        val code = "6a7ba6b1a2e6eaf211bfc87c2ba7b6dc:1acb950632a327bd45638e16c6766bef:210910003000000"
@@ -373,11 +367,54 @@ class QrisFragment : Fragment(), View.OnClickListener {
 
 //                BtnOnMachine.isEnabled =false
 
-                findNavController().navigate(R.id.action_qrisFragment_to_homeFragment)
+                insertTransactions()
 
             }
 
             override fun onFailure(call: Call<ResponseUpdateMachine>, t: Throwable) {
+                Log.d("error", t.message.toString())
+                if (t.message == t.message){
+
+//                    BtnOnMachine.isEnabled =true
+
+                    Toast.makeText(requireContext(), "Tidak ada koneksi Internet" , Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
+    }
+
+    private fun insertTransactions(){
+
+        val current = LocalDateTime.now()
+
+        val formatDay = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+        val date = current.format(formatDay)
+
+        val formatTime = DateTimeFormatter.ofPattern("HH:mm")
+        val time = current.format(formatTime)
+
+        val bodyUpdate = ResponseTransactions(
+            date,
+            args.machineNumber,
+            args.price.toString(),
+            time,
+            args.machineType
+        )
+
+        RetrofitClientTransactions.instance.insertTransactions(bodyUpdate).enqueue(object : Callback<ResponseTransactions> {
+            override fun onResponse(call: Call<ResponseTransactions>, response: Response<ResponseTransactions>) {
+                Log.d("retrofitinsert", args.machineId.toString())
+//                Log.d("retrofitinsert", response.)
+                Log.d("retrofitinsert", response.code().toString())
+                Log.d("retrofitinsert", response.body().toString())
+
+//                BtnOnMachine.isEnabled =false
+
+                findNavController().navigate(R.id.action_qrisFragment_to_homeFragment)
+
+            }
+
+            override fun onFailure(call: Call<ResponseTransactions>, t: Throwable) {
                 Log.d("error", t.message.toString())
                 if (t.message == t.message){
 

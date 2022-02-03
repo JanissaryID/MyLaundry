@@ -24,12 +24,6 @@ class SettingViewModel(application: Application): AndroidViewModel(application) 
         }
     }
 
-//    fun deleteLockerBox(lockerbox: Settings){
-//        viewModelScope.launch(Dispatchers.IO) {
-//            repository.deleteLockerBox(lockerbox)
-//        }
-//    }
-//
     fun updateSettings(settings: Settings){
         viewModelScope.launch(Dispatchers.IO) {
             repository.updatevalueSettings(settings)

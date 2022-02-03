@@ -37,7 +37,6 @@ import retrofit2.Response
 
 
 class HomeFragment : Fragment(), View.OnClickListener {
-    // TODO: Rename and change types of parameters
 
     private lateinit var uiScope : CoroutineScope
 
@@ -61,12 +60,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
     private lateinit var dbTransactions: TransactionsDatabaseGet
 
     private lateinit var dataExcel: List<Transactions>
-
-    private var statOK : Boolean = false
-    private var washOK : Boolean = false
-    private var dryerOK : Boolean = false
-    private var AvailableOK : Boolean = false
-    private var okCreate : Boolean = true
 
     companion object{
         var washerMachine : Int = 0
@@ -125,14 +118,35 @@ class HomeFragment : Fragment(), View.OnClickListener {
         var viewModelJob = Job()
         uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
-        statOK = false
-        washOK = false
-        dryerOK = false
-        AvailableOK = false
-
         askPermision()
         viewUI(false)
-        getdataMachine()
+
+//        getdataMachine()
+        backgroundGet()
+
+    }
+
+    private fun backgroundGet(){
+        var viewModelJob = Job()
+        var uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+
+        uiScope.launch {
+            withContext(Dispatchers.IO) {
+                while (true){
+                    try {
+                        Thread.sleep(5000L)
+                        getdataMachine()
+                        Log.d("loop", "Looping While")
+                    }
+                    catch (e: Exception){
+                        Log.d("check", e.toString())
+                    }
+                    withContext(Dispatchers.Main){
+//                    titleLaundryHomeTv.text = nameStorevar
+                    }
+                }
+            }
+        }
 
     }
 
@@ -160,43 +174,48 @@ class HomeFragment : Fragment(), View.OnClickListener {
         ListMachine.listDryerUse.clear()
         ListMachine.listWasherUse.clear()
 
-        RetrofitClientMachine.instance.getMachine().enqueue(object : Callback<List<ResponseMachine>> {
-            override fun onResponse(call: Call<List<ResponseMachine>>, response: Response<List<ResponseMachine>>) {
-                Log.d("retrofit", "Code : ${response.code().toString()}")
+        try {
+            RetrofitClientMachine.instance.getMachine().enqueue(object : Callback<List<ResponseMachine>> {
+                override fun onResponse(call: Call<List<ResponseMachine>>, response: Response<List<ResponseMachine>>) {
+//                    Log.d("retrofit", "Code : ${response.code().toString()}")
 //                Log.d("retrofit", "Code : ${response.body().toString()}")
-                response.body()?.let {
-                    ListMachine.listMachine.addAll(it)
-                }
-
-                for (a in ListMachine.listMachine){
-                    if (a.machineType == 0){
-                        ListMachine.listWasher.add(a)
-
-                        if (a.machineStatus == true){
-                            ListMachine.listWasherUse.add(a)
-                        }
+                    response.body()?.let {
+                        ListMachine.listMachine.addAll(it)
                     }
-                    else{
-                        ListMachine.listDryer.add(a)
-                        if (a.machineStatus == true){
-                            ListMachine.listDryerUse.add(a)
+
+                    for (a in ListMachine.listMachine){
+                        if (a.machineType == 0){
+                            ListMachine.listWasher.add(a)
+
+                            if (a.machineStatus == true){
+                                ListMachine.listWasherUse.add(a)
+                            }
                         }
+                        else{
+                            ListMachine.listDryer.add(a)
+                            if (a.machineStatus == true){
+                                ListMachine.listDryerUse.add(a)
+                            }
+                        }
+//                        Log.d("retrofit", "Code : ${a.machineType}")
+//                        Log.d("retrofit", "Code : ${a}")
                     }
-                    Log.d("retrofit", "Code : ${a.machineType}")
-                    Log.d("retrofit", "Code : ${a}")
+                    viewUI(true)
+
                 }
-                viewUI(true)
 
-            }
-
-            override fun onFailure(call: Call<List<ResponseMachine>>, t: Throwable) {
-                Log.d("p2", t.message.toString())
-                if (t.message == t.message){
-                    Toast.makeText(requireContext(), "Tidak ada koneksi Internet" , Toast.LENGTH_SHORT).show()
+                override fun onFailure(call: Call<List<ResponseMachine>>, t: Throwable) {
+                    Log.d("p2", t.message.toString())
+                    if (t.message == t.message){
+                        Toast.makeText(requireContext(), "Tidak ada koneksi Internet" , Toast.LENGTH_SHORT).show()
+                    }
                 }
-            }
 
-        })
+            })
+        }
+        catch (e : Exception){
+            Toast.makeText(requireContext(), "Error $e" , Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun viewUI(stat:Boolean){
@@ -236,12 +255,12 @@ class HomeFragment : Fragment(), View.OnClickListener {
             withContext(Dispatchers.IO) {
                 try {
                     if (statInsert){
-                        getDataMachine()
+                        getDataSettings()
                         dataExcel = dbTransactions.dataDao().getAllData()
                         Log.d("run", "Routine")
                     }
                     else{
-                        getDataMachine()
+                        getDataSettings()
                         Log.d("run", "Routine")
                     }
                 }
@@ -256,24 +275,13 @@ class HomeFragment : Fragment(), View.OnClickListener {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun getDataMachine() {
+    private fun getDataSettings() {
 
         val data: List<Settings> = db.dataDao().getAllData()
 
-
         for (value in data){
             val separate1 = value.nameSetting!!.split(" ")[1]
-            if(separate1 == "machine"){
-                val separate = value.nameSetting!!.split(" ")[0]
-                if (separate == "Washer"){
-
-                    washerMachine = value.valueSetting!!.toInt()
-                }
-                else if (separate == "Dryer"){
-                    dryerMachine = value.valueSetting!!.toInt()
-                }
-            }
-            else if(separate1 == "price"){
+            if(separate1 == "price"){
                 val separate = value.nameSetting!!.split(" ")[0]
                 if (separate == "Washer"){
                     priceWasher = value.valueSetting!!
@@ -317,8 +325,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 }
             }
         }
-        statOK = true
-
+//        getdataMachine()
     }
 
     override fun onClick(p0: View?) {
@@ -335,8 +342,9 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 Navigation.findNavController(p0).navigate(action)
             }
             R.id.btnSeeAllTransactions -> {
-                val excel = CreateExcel()
-                excel.createExcelSheet()
+                findNavController().navigate(R.id.action_homeFragment_to_transactionFragment)
+//                val excel = CreateExcel()
+//                excel.createExcelSheet()
 //                Toast.makeText(requireContext(), "Tidak ada koneksi Internet" , Toast.LENGTH_SHORT).show()
             }
         }

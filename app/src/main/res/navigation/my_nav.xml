@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_homeFragment_to_listMachine"
             app:destination="@id/listMachine" />
+        <action
+            android:id="@+id/action_homeFragment_to_transactionFragment"
+            app:destination="@id/transactionFragment" />
     </fragment>
     <fragment
         android:id="@+id/settingFragment"
@@ -92,4 +95,9 @@
             app:popUpTo="@id/homeFragment"
             app:popUpToInclusive="true" />
     </fragment>
+    <fragment
+        android:id="@+id/transactionFragment"
+        android:name="com.example.mylaundry.fragment.TransactionFragment"
+        android:label="fragment_transaction"
+        tools:layout="@layout/fragment_transaction" />
 </navigation>

@@ -10,8 +10,8 @@ import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
 
-    val titleName = listOf<String>("Name laundry","Washer price","Dryer price","Client ID","Key Client","Merchant ID","Password settings")
-    val valueName = listOf<Any>("Bubble Laundry",100,100,"bd273!@#-*(NDas","bd273!@#-*(NDasasdasd","210000000000000","admin")
+    val titleName = listOf<String>("Name laundry","Washer price","Dryer price","Client ID","Key Client","Merchant ID","Password settings","server address","server port")
+    val valueName = listOf<Any>("Bubble Laundry",100,100,"bd273!@#-*(NDas","bd273!@#-*(NDasasdasd","210000000000000","admin","192.168.34.1", "8000")
 
     private lateinit var mSettingViewModel : SettingViewModel
 

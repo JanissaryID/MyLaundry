@@ -27,12 +27,6 @@ class ListMachine : Fragment(), View.OnClickListener {
     private lateinit var titleList : TextView
     private lateinit var emptyTextMachine : TextView
 
-//    lateinit var buttonCheckout : Button
-
-//    private lateinit var rvMachine: RecyclerView
-
-
-
     private var priceMachine : String = "0"
 
     companion object{
@@ -148,9 +142,6 @@ class ListMachine : Fragment(), View.OnClickListener {
                 showLoading(true)
             }
         }
-//        rvMachine.layoutManager = GridLayoutManager(requireContext(), 3)
-//        rvMachine.adapter = adapter
-//        rvMachine.setHasFixedSize(true)
     }
 
     private fun ContainsDot(price : String): Int {
@@ -166,31 +157,13 @@ class ListMachine : Fragment(), View.OnClickListener {
         return MachinePrice
     }
 
-//    private fun updateValueMachine(machine:String,id: Int, number : Int){
-//        Log.d("checktitle", "Check title " + machine)
-//        val separate = machine!!.split(" ")[0]
-//        Log.d("checktitle", "Check title " + separate)
-//        if(separate == "Washer"){
-//            val updatedvalue = Washer(id,number,true)
-//            mWasherViewModel.updateWasher(updatedvalue)
-//        }
-//        else{
-//            val updatedvalue = Dryer(id,number,true)
-//            mDryerViewModel.updateDryer(updatedvalue)
-//        }
-//    }
-
     override fun onClick(p0: View?) {
         when(p0!!.id){
             R.id.ButtonBackList -> {
-//                listWasher.clear()
-//                listDryer.clear()
                 activity?.onBackPressed()
             }
             R.id.buttonCheckout -> {
                 statButton = false
-//                updateValueMachine(args.titleBar!!, idMachine, number)
-//                Log.d("checktitle", "Check title " + args.titleBar)
 
                 val separate1 = args.titleBar!!.split(" ")[0]
                 Log.d("checkrefid", "Check title " + args.titleBar)
