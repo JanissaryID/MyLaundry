@@ -237,7 +237,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <Button
-            android:id="@+id/btnService"
+            android:id="@+id/btnSeeAllTransactions"
             style="?android:attr/borderlessButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="48dp"
@@ -247,7 +247,7 @@
             android:layout_marginBottom="15dp"
             android:background="@drawable/header_layout"
             android:foreground="?android:attr/selectableItemBackground"
-            android:text="Start Service"
+            android:text="See All Transactions"
             android:textAllCaps="false"
             android:textColor="@color/white" />
 

@@ -55,7 +55,6 @@ class MachineAdapter(private val listMachine: ArrayList<ResponseMachine>, price:
 
 
         holder.itemView.setOnClickListener{
-//            Toast.makeText(holder.itemView.context, "Kamu memilih Dryer machine nomor " + listDryer[position].numberMachine, Toast.LENGTH_SHORT).show()
             if(dryer.machineStatus == false){
                 val previousItem = selectedItem
                 selectedItem = position
@@ -67,7 +66,7 @@ class MachineAdapter(private val listMachine: ArrayList<ResponseMachine>, price:
                 val home = ListMachine()
                 home.buttonStat(ListMachine.buttonCheckoutMachine, priceMachine)
 
-                ListMachine.idMachine = listMachine[position].machineId!!
+                ListMachine.idMachine = listMachine[position].id!!
                 ListMachine.number = listMachine[position].machineNumber!!
 
                 Log.d("checkButton", ListMachine.statButton.toString())

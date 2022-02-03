@@ -14,21 +14,19 @@ import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.mylaundry.R
+import com.example.mylaundry.api.machine.ResponseMachine
+import com.example.mylaundry.api.machine.ResponseUpdateMachine
+import com.example.mylaundry.api.machine.RetrofitClientMachine
 import com.example.mylaundry.api.qris.generate.GetResponseAPI
 import com.example.mylaundry.api.qris.payment.ResponsePaymentAPI
 import com.example.mylaundry.api.qris.generate.ResponseAPI
 import com.example.mylaundry.api.qris.RetrofitClient
 import com.example.mylaundry.api.payment.GetResponsePaymentAPI
-//import com.example.mylaundry.room.dryermachine.Dryer
-//import com.example.mylaundry.room.dryermachine.DryerViewModel
 import com.example.mylaundry.room.transactions.Transactions
 import com.example.mylaundry.room.transactions.TransactionsViewModel
-//import com.example.mylaundry.room.washermachine.Washer
-//import com.example.mylaundry.room.washermachine.WasherViewModel
-import com.example.mylaundry.services.ForegroundServices
-import com.example.mylaundry.socket.SocketPrograming
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.*
@@ -348,82 +346,6 @@ class QrisFragment : Fragment(), View.OnClickListener {
         uiScope.cancel()
     }
 
-    private fun MulticastSocketPrograming(){
-        var HEADER = 0xC8
-        var WASHER = 0x01
-        var DRYER = 0x02
-        var COMMAND = listOf<Int>(0x01,0x0A,0x02,0x10)
-        var DATA = 0x01
-        var myData = ""
-//        var msg = "Hello"
-        var IP_ADDRESS = "224.16.32.110"
-        var PORT = 11968
-
-
-        if (args.machineType == "Dryer Machine"){
-            myData = "$HEADER$DRYER${Integer.toHexString((args.machineNumber))}${COMMAND[0]}$DATA"
-        }
-        else{
-            myData = "$HEADER$WASHER${Integer.toHexString((args.machineNumber))}${COMMAND[0]}$DATA"
-        }
-
-        try{
-            val group = InetAddress.getByName(IP_ADDRESS)
-            val s = MulticastSocket(PORT)
-            s.joinGroup(group)
-            val bytes = myData.toByteArray(StandardCharsets.UTF_8)
-            val hi = DatagramPacket(
-                bytes, bytes.size,
-                group, PORT
-            )
-            s.send(hi)
-            val buf = ByteArray(8)
-            val recv = DatagramPacket(buf, buf.size)
-            s.receive(recv)
-            s.leaveGroup(group)
-//            buClickValue = buClickValue.replace(".", "")
-            var getData = recv.data.decodeToString().length
-
-            Log.d("getdata", "Get Data � : " + getData)
-        }
-        catch (e : SocketException){
-            Log.d("error", "error : " + e)
-        }
-        catch (e : IOException){
-            Log.d("error", "error : " + e)
-        }
-        catch (e : ErrnoException){
-            Log.d("error", "error : " + e)
-        }
-    }
-
-    private fun doBackDoor(){
-        val socketsend = SocketPrograming(HomeFragment.ipvar, HomeFragment.portvar.toInt(),args.machineNumber,args.machineType.toString(), requireContext())
-
-        uiScope.launch {
-            try{
-                withContext(Dispatchers.IO) {
-                    socketsend.createObjectMulticast()
-//                socket.multicastSend()
-                    socketsend.multicastSend()
-//                    while (!ForegroundServices.statConfrimActivation){
-//                        updateValueMachine(args.machineType!!, ListMachine.idMachine, ListMachine.number)
-//                        Log.d("services", "chek stat $ForegroundServices.statConfrimActivation")
-//                    }
-                    ForegroundServices.statConfrimActivation = false
-
-                    withContext(Dispatchers.Main){
-                        activity?.onBackPressed()
-                    }
-                }
-            }
-            catch (e :Exception){
-                Log.d("error", "error : " + e)
-//                Toast.makeText(requireContext(), "$e", Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-
     private fun addTransactions(){
         val simpleDateFormat = SimpleDateFormat("dd-MM-yyyy")
         val simpleTimeFormat = SimpleDateFormat("HH:mm:ss")
@@ -439,6 +361,34 @@ class QrisFragment : Fragment(), View.OnClickListener {
         mTransactionsViewModel.addTransactions(transactions)
     }
 
+    private fun rentMachine(){
+
+        val bodyUpdate = ResponseUpdateMachine(true)
+
+        RetrofitClientMachine.instance.putMachine(args.machineId, bodyUpdate).enqueue(object : Callback<ResponseUpdateMachine> {
+            override fun onResponse(call: Call<ResponseUpdateMachine>, response: Response<ResponseUpdateMachine>) {
+                Log.d("retrofitput", args.machineId.toString())
+                Log.d("retrofitput", response.code().toString())
+                Log.d("retrofitput", response.body().toString())
+
+//                BtnOnMachine.isEnabled =false
+
+                findNavController().navigate(R.id.action_qrisFragment_to_homeFragment)
+
+            }
+
+            override fun onFailure(call: Call<ResponseUpdateMachine>, t: Throwable) {
+                Log.d("error", t.message.toString())
+                if (t.message == t.message){
+
+//                    BtnOnMachine.isEnabled =true
+
+                    Toast.makeText(requireContext(), "Tidak ada koneksi Internet" , Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
+    }
+
     override fun onClick(p0: View?) {
         when(p0!!.id){
             R.id.ButtonBackQR -> {
@@ -447,8 +397,9 @@ class QrisFragment : Fragment(), View.OnClickListener {
                 activity?.onBackPressed()
             }
             R.id.ButtonOn -> {
-//                dataUDP()
-                doBackDoor()
+                rentMachine()
+//                BtnOnMachine.isEnabled =false
+
 //                Toast.makeText(requireContext(), "Reveived Data : ${SocketPrograming.getData}" , Toast.LENGTH_SHORT).show()
 
 //                successPayment = false

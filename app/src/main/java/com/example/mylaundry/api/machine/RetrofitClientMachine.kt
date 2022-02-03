@@ -3,7 +3,7 @@ package com.example.mylaundry.api.machine
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object RetrofitClient {
+object RetrofitClientMachine {
     private const val BASE_URL = "https://app-laundry-api.herokuapp.com"
 
     val instance : API by lazy {

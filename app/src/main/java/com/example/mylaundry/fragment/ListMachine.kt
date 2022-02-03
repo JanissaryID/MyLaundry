@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
@@ -18,11 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.mylaundry.R
 import com.example.mylaundry.adapter.MachineAdapter
 import com.example.mylaundry.api.machine.ResponseMachine
-import com.example.mylaundry.api.machine.RetrofitClient
 import kotlinx.android.synthetic.main.fragment_list_machine.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class ListMachine : Fragment(), View.OnClickListener {
 
@@ -208,7 +203,8 @@ class ListMachine : Fragment(), View.OnClickListener {
                     rvMachine.adapter = adapterWasher
 
                     val pricemachineWasher = ContainsDot(HomeFragment.priceWasher)
-                    val action = ListMachineDirections.actionListMachineToQrisFragment(args.titleBar.toString(),number,pricemachineWasher)
+                    val action = ListMachineDirections.actionListMachineToQrisFragment(args.titleBar.toString(),number,pricemachineWasher,
+                        idMachine)
                     Navigation.findNavController(p0).navigate(action)
                 }
                 else if (separate1 == "Dryer"){
@@ -217,7 +213,8 @@ class ListMachine : Fragment(), View.OnClickListener {
                     rvMachine.adapter = adapterDryer
 
                     val pricemachineDryer = ContainsDot(HomeFragment.priceDryer)
-                    val action = ListMachineDirections.actionListMachineToQrisFragment(args.titleBar.toString(),number,pricemachineDryer)
+                    val action = ListMachineDirections.actionListMachineToQrisFragment(args.titleBar.toString(),number,pricemachineDryer,
+                        idMachine)
                     Navigation.findNavController(p0).navigate(action)
                 }
             }

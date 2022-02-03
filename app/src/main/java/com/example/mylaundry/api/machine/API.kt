@@ -12,5 +12,14 @@ interface API {
     @GET("/machine")
     fun getMachine(): Call<List<ResponseMachine>>
 
+    @Headers(
+        "Accept: application/json",
+        "Content-Type: application/json"
+    )
+    @PUT("/update")
+    fun putMachine(
+        @Query(value="sl_id", encoded=true) sl_id: Int?, @Body updateData : ResponseUpdateMachine
+    ): Call<ResponseUpdateMachine>
+
 
 }

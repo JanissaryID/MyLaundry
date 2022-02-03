@@ -1,7 +1,6 @@
 package com.example.mylaundry.fragment
 
 import android.Manifest
-import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -14,51 +13,24 @@ import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
 import androidx.core.view.isVisible
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.room.Room
-import androidx.test.core.app.ApplicationProvider
 import com.example.mylaundry.R
 import com.example.mylaundry.room.settings.SettingDatabaseGet
 import com.example.mylaundry.room.settings.Settings
 import com.example.mylaundry.room.transactions.Transactions
 import com.example.mylaundry.room.transactions.TransactionsDatabaseGet
 import kotlinx.coroutines.*
-import org.apache.poi.hssf.usermodel.HSSFWorkbook
-import org.apache.poi.ss.usermodel.Cell
-import org.apache.poi.ss.usermodel.Row
-import org.apache.poi.ss.usermodel.Sheet
-import org.apache.poi.ss.usermodel.Workbook
 import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 import java.lang.Exception
-import java.util.*
 import android.widget.Toast
-
-import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import android.app.Activity
-
 import androidx.core.app.ActivityCompat
-
 import android.content.pm.PackageManager
-import android.os.Build.VERSION_CODES.Q
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mylaundry.api.machine.ResponseMachine
-import com.example.mylaundry.api.machine.RetrofitClient
-import com.example.mylaundry.services.ForegroundServices
-import com.google.ar.core.Config
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import org.junit.runner.RunWith
-import java.io.FileNotFoundException
-import org.apache.poi.hssf.usermodel.HSSFCell
-
-import org.apache.poi.hssf.usermodel.HSSFRow
-
-import org.apache.poi.hssf.usermodel.HSSFSheet
-import org.apache.poi.xssf.usermodel.XSSFSheet
+import com.example.mylaundry.api.machine.RetrofitClientMachine
+import com.example.mylaundry.excel.CreateExcel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -99,8 +71,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
     companion object{
         var washerMachine : Int = 0
         var dryerMachine : Int = 0
-        var washerMachineUsed : Int = 0
-        var dryerMachineUsed : Int = 0
         var priceWasher : String = ""
         var priceDryer : String = ""
         var clientIDvar : String = ""
@@ -113,11 +83,8 @@ class HomeFragment : Fragment(), View.OnClickListener {
     }
 
     val numberMachine = listOf<Int>()
-//    val dataExcel: List<Transactions> =
 
     private val filePath: File = File(Environment.getExternalStorageDirectory().toString() + "/Demo.xls")
-
-//    private val listSettings = emptyList<Settings>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -130,10 +97,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory", "com.fasterxml.aalto.stax.InputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
 
         db = Room.databaseBuilder(requireContext(), SettingDatabaseGet::class.java, "LaundryDatabase").build()
         dbTransactions = Room.databaseBuilder(requireContext(), TransactionsDatabaseGet::class.java, "TransactionDatabase").build()
@@ -156,7 +119,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
         progressWasher = view.findViewById(R.id.progressbar_washer)
         progressDryer = view.findViewById(R.id.progressbar_dryer)
 
-        buttonService = view.findViewById(R.id.btnService)
+        buttonService = view.findViewById(R.id.btnSeeAllTransactions)
         buttonService.setOnClickListener(this)
 
         var viewModelJob = Job()
@@ -197,7 +160,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
         ListMachine.listDryerUse.clear()
         ListMachine.listWasherUse.clear()
 
-        RetrofitClient.instance.getMachine().enqueue(object : Callback<List<ResponseMachine>> {
+        RetrofitClientMachine.instance.getMachine().enqueue(object : Callback<List<ResponseMachine>> {
             override fun onResponse(call: Call<List<ResponseMachine>>, response: Response<List<ResponseMachine>>) {
                 Log.d("retrofit", "Code : ${response.code().toString()}")
 //                Log.d("retrofit", "Code : ${response.body().toString()}")
@@ -287,18 +250,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 }
                 withContext(Dispatchers.Main){
                       titleLaundryHomeTv.text = nameStorevar
-//                    Log.d("check", "While ON")
-//                    Log.d("check", "statOK $statOK")
-//                    Log.d("check", "washOK $washOK")
-//                    Log.d("check", "dryerOK $dryerOK")
-//                    Log.d("check", "Available $AvailableOK")
-//                    if (statOK && washOK && dryerOK && AvailableOK){
-//                        viewUI(true)
-//                    }
-//                    else{
-//                        viewUI(false)
-//                    }
-//                    Log.d("check", "While OFF")
                 }
             }
         }
@@ -370,188 +321,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     }
 
-    fun createXlFile() {
-
-        // File filePath = new File(Environment.getExternalStorageDirectory() + "/Demo.xls");
-        val wb: Workbook = HSSFWorkbook()
-        var cell: Cell? = null
-        var sheet: Sheet? = null
-        sheet = wb.createSheet("Demo Excel Sheet")
-        //Now column and row
-        val row: Row = sheet.createRow(0)
-        cell = row.createCell(0)
-        cell.setCellValue("Type Machine")
-        cell = row.createCell(1)
-        cell.setCellValue("No Machine")
-        cell = row.createCell(2)
-        cell.setCellValue("Date")
-        cell = row.createCell(3)
-        cell.setCellValue("Time")
-        cell = row.createCell(4)
-        cell.setCellValue("Price")
-
-        //column width
-        sheet.setColumnWidth(0, 20 * 200)
-        sheet.setColumnWidth(1, 30 * 200)
-        sheet.setColumnWidth(2, 30 * 200)
-        sheet.setColumnWidth(3, 30 * 200)
-        sheet.setColumnWidth(4, 30 * 200)
-
-        var a = 0
-        for (value in dataExcel){
-            val row1: Row = sheet.createRow(a + 1)
-            cell = row1.createCell(0)
-            cell.setCellValue(value.typeMachine)
-            Log.d("ok", value.typeMachine.toString())
-            cell = row1.createCell(1)
-            cell.setCellValue(value.noMachine.toString())
-            Log.d("ok", value.noMachine.toString())
-            cell = row1.createCell(2)
-            cell.setCellValue(value.date.toString())
-            Log.d("ok", value.date.toString())
-            cell = row1.createCell(3)
-            cell.setCellValue(value.timeMachine.toString())
-            Log.d("ok", value.timeMachine.toString())
-            cell = row1.createCell(4)
-            cell.setCellValue(value.priceMachine.toString())
-            Log.d("ok", value.priceMachine.toString())
-
-            sheet.setColumnWidth(0, 20 * 200)
-            sheet.setColumnWidth(1, 30 * 200)
-            sheet.setColumnWidth(2, 30 * 200)
-            sheet.setColumnWidth(3, 30 * 200)
-            sheet.setColumnWidth(4, 30 * 200)
-        }
-        a = 0
-        Log.d("ok", "OK EXCEL")
-
-        val folderName = "Import Excel"
-        val fileName = folderName + System.currentTimeMillis() + ".xls"
-//        val path = Environment.getExternalStorageDirectory().path + ""
-//        val file = File(Environment.getExternalStorageDirectory()
-        val path: String = Environment.getExternalStorageDirectory().path + File.separator.toString() + folderName + File.separator.toString() + fileName
-        val file = File(Environment.getExternalStorageDirectory().path + File.separator.toString() + folderName)
-        if (!file.exists()) {
-            file.mkdirs()
-        }
-        var outputStream: FileOutputStream? = null
-        try {
-            outputStream = FileOutputStream(path)
-            wb.write(outputStream)
-            // ShareViaEmail(file.getParentFile().getName(),file.getName());
-            Toast.makeText(ApplicationProvider.getApplicationContext<Context>(), "Excel Created in $path", Toast.LENGTH_SHORT).show()
-        } catch (e: IOException) {
-            e.printStackTrace()
-            Toast.makeText(
-                ApplicationProvider.getApplicationContext<Context>(),
-                "Not OK",
-                Toast.LENGTH_LONG
-            ).show()
-            try {
-                outputStream!!.close()
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            }
-        }
-    }
-
-    fun exsel(){
-        // Blank workbook
-        // Blank workbook
-        val workbook = XSSFWorkbook()
-
-        // Creating a blank Excel sheet
-
-        // Creating a blank Excel sheet
-        val sheet = workbook.createSheet("student Details")
-
-        // Creating an empty TreeMap of string and Object][]
-        // type
-
-        // Creating an empty TreeMap of string and Object][]
-        // type
-        val data: MutableMap<String, Array<Any>> = TreeMap()
-
-        // Writing data to Object[]
-        // using put() method
-
-        // Writing data to Object[]
-        // using put() method
-        data["1"] = arrayOf("ID", "NAME", "LASTNAME")
-        data["2"] = arrayOf(1, "Pankaj", "Kumar")
-        data["3"] = arrayOf(2, "Prakashni", "Yadav")
-        data["4"] = arrayOf(3, "Ayan", "Mondal")
-        data["5"] = arrayOf(4, "Virat", "kohli")
-
-        // Iterating over data and writing it to sheet
-
-        // Iterating over data and writing it to sheet
-        val keyset: Set<String> = data.keys
-
-        var rownum = 0
-
-        for (key in keyset) {
-
-            // Creating a new row in the sheet
-            val row: Row = sheet.createRow(rownum++)
-            val objArr = data[key]!!
-            var cellnum = 0
-            for (obj in objArr) {
-
-                // This line creates a cell in the next
-                //  column of that row
-                val cell = row.createCell(cellnum++)
-                if (obj is String) cell.setCellValue(obj as String) else if (obj is Int) cell.setCellValue(
-                    (obj as Int?)!!.toDouble()
-                )
-            }
-        }
-
-        // Try block to check for exceptions
-
-        // Try block to check for exceptions
-        try {
-
-            // Writing the workbook
-            val out = FileOutputStream(
-                File("gfgcontribute.xlsx")
-            )
-            workbook.write(out)
-
-            // Closing file output connections
-            out.close()
-
-            // Console message for successful execution of
-            // program
-            println(
-                "gfgcontribute.xlsx written successfully on disk."
-            )
-        } // Catch block to handle exceptions
-        catch (e: Exception) {
-
-            // Display exceptions along with line number
-            // using printStackTrace() method
-            e.printStackTrace()
-        }
-    }
-
-    private fun backDoorTransactions(){
-        uiScope.launch {
-            withContext(Dispatchers.IO) {
-
-                createXlFile()
-                withContext(Dispatchers.Main){
-                    if (okCreate){
-                        Toast.makeText(requireContext(), "Excel Created in $filePath", Toast.LENGTH_SHORT).show()
-                    }
-                    else{
-                        Toast.makeText(requireContext(), "Not OK", Toast.LENGTH_LONG).show()
-                    }
-                }
-            }
-        }
-    }
-
     override fun onClick(p0: View?) {
         when(p0!!.id){
             R.id.imageButton -> {
@@ -565,10 +334,9 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 val action = HomeFragmentDirections.actionHomeFragmentToListMachine("Dryer Machine", priceDryer, 1)
                 Navigation.findNavController(p0).navigate(action)
             }
-            R.id.btnService -> {
-                exsel()
-//                backDoorTransactions()
-//                createXlFile()
+            R.id.btnSeeAllTransactions -> {
+                val excel = CreateExcel()
+                excel.createExcelSheet()
 //                Toast.makeText(requireContext(), "Tidak ada koneksi Internet" , Toast.LENGTH_SHORT).show()
             }
         }
