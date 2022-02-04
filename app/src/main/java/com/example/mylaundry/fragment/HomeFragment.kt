@@ -127,27 +127,22 @@ class HomeFragment : Fragment(), View.OnClickListener {
     }
 
     private fun backgroundGet(){
-        var viewModelJob = Job()
-        var uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+        var viewModelJobget = Job()
+        var uiScopeget = CoroutineScope(Dispatchers.Main + viewModelJobget)
 
-        uiScope.launch {
+        uiScopeget.launch {
             withContext(Dispatchers.IO) {
                 while (true){
                     try {
-                        Thread.sleep(5000L)
+                        Thread.sleep(10000L)
                         getdataMachine()
-                        Log.d("loop", "Looping While")
                     }
                     catch (e: Exception){
                         Log.d("check", e.toString())
                     }
-                    withContext(Dispatchers.Main){
-//                    titleLaundryHomeTv.text = nameStorevar
-                    }
                 }
             }
         }
-
     }
 
     private fun askPermision(){
@@ -177,12 +172,11 @@ class HomeFragment : Fragment(), View.OnClickListener {
         try {
             RetrofitClientMachine.instance.getMachine().enqueue(object : Callback<List<ResponseMachine>> {
                 override fun onResponse(call: Call<List<ResponseMachine>>, response: Response<List<ResponseMachine>>) {
-//                    Log.d("retrofit", "Code : ${response.code().toString()}")
+                    Log.d("retrofit", "Code : ${response.code().toString()}")
 //                Log.d("retrofit", "Code : ${response.body().toString()}")
                     response.body()?.let {
                         ListMachine.listMachine.addAll(it)
                     }
-
                     for (a in ListMachine.listMachine){
                         if (a.machineType == 0){
                             ListMachine.listWasher.add(a)
@@ -197,11 +191,8 @@ class HomeFragment : Fragment(), View.OnClickListener {
                                 ListMachine.listDryerUse.add(a)
                             }
                         }
-//                        Log.d("retrofit", "Code : ${a.machineType}")
-//                        Log.d("retrofit", "Code : ${a}")
                     }
                     viewUI(true)
-
                 }
 
                 override fun onFailure(call: Call<List<ResponseMachine>>, t: Throwable) {

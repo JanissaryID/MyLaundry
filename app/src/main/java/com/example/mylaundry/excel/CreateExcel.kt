@@ -1,6 +1,8 @@
 package com.example.mylaundry.excel
 
 import android.os.Environment
+import android.util.Log
+import com.example.mylaundry.fragment.TransactionFragment
 import jxl.Workbook
 import jxl.WorkbookSettings
 import jxl.format.Alignment
@@ -18,14 +20,23 @@ class CreateExcel {
 
     var workbook: WritableWorkbook? = null
 
-    fun createExcelSheet() {
+    fun createExcelSheet(date: String) {
+        var dateTitle = date
+        var csvFile = ""
+        var a = 0
 
         val current = LocalDateTime.now()
 
         val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
         val formatted = current.format(formatter)
 
-        val csvFile = "Report ${formatted}.xls"
+        if(dateTitle == ""){
+            csvFile = "Report ${formatted}.xls"
+        }
+        else{
+            csvFile = "Report ${date}.xls"
+        }
+
         val futureStudioIconFile = File(
             Environment
                 .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
@@ -62,11 +73,11 @@ class CreateExcel {
             val sheet = workbook!!.createSheet("sheet1", 0)
 
             sheet.setColumnView(0,4)
-            sheet.setColumnView(1,10)
-            sheet.setColumnView(2,10)
-            sheet.setColumnView(3,10)
-            sheet.setColumnView(4,10)
-            sheet.setColumnView(5,10)
+            sheet.setColumnView(1,15)
+            sheet.setColumnView(2,15)
+            sheet.setColumnView(3,15)
+            sheet.setColumnView(4,15)
+            sheet.setColumnView(5,15)
 
             sheet.mergeCells(0,0,0,1)
             sheet.mergeCells(1,0,2,0)
@@ -83,14 +94,17 @@ class CreateExcel {
             sheet.addCell(Label(3, 0, "Date",format1))
             sheet.addCell(Label(4, 0, "Time",format1))
             sheet.addCell(Label(5, 0, "Price",format1))
-            for (i in listdata.indices) {
-                sheet.addCell(Label(0, i + 2, listdata[i].no.toString(), format2))
-                sheet.addCell(Label(1, i + 2, listdata[i].type))
-                sheet.addCell(Label(2, i + 2, listdata[i].number.toString(),format2))
-                sheet.addCell(Label(3, i + 2, listdata[i].date, format2))
-                sheet.addCell(Label(4, i + 2, listdata[i].time,format2))
-                sheet.addCell(Label(5, i + 2, listdata[i].price,format2))
+            for (i in TransactionFragment.listTrans.indices) {
+                sheet.addCell(Label(0, i + 2, (i+1).toString(), format2))
+                sheet.addCell(Label(1, i + 2, TransactionFragment.listTrans[i].type))
+                sheet.addCell(Label(2, i + 2, TransactionFragment.listTrans[i].number.toString(),format2))
+                sheet.addCell(Label(3, i + 2, TransactionFragment.listTrans[i].date, format2))
+                sheet.addCell(Label(4, i + 2, TransactionFragment.listTrans[i].time,format2))
+                sheet.addCell(Label(5, i + 2, TransactionFragment.listTrans[i].price,format2))
             }
+            sheet.mergeCells(0,(TransactionFragment.listTrans.size) + 2,(TransactionFragment.listTrans.size),(TransactionFragment.listTrans.size))
+            sheet.addCell(Label(4, (TransactionFragment.listTrans.size) + 2, "Total",format2))
+//            Log.d("excel", TransactionFragment.listTrans.size.toString())
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }

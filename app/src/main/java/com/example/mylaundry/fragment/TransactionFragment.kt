@@ -24,10 +24,12 @@ import com.example.mylaundry.api.machine.ResponseMachine
 import com.example.mylaundry.api.machine.RetrofitClientMachine
 import com.example.mylaundry.api.transactions.ResponseTransactions
 import com.example.mylaundry.api.transactions.RetrofitClientTransactions
+import com.example.mylaundry.excel.CreateExcel
 import com.example.mylaundry.room.settings.SettingViewModel
 import kotlinx.android.synthetic.main.dialog_datepicker.view.*
 import kotlinx.android.synthetic.main.dialog_login.view.*
 import kotlinx.android.synthetic.main.dialog_login.view.buttonEnter
+import kotlinx.android.synthetic.main.fragment_list_machine.*
 import kotlinx.android.synthetic.main.fragment_transaction.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -38,7 +40,11 @@ class TransactionFragment : Fragment(), View.OnClickListener {
 
     private lateinit var rvTransactions: RecyclerView
 
-    private val listTrans = ArrayList<ResponseTransactions>()
+
+
+    companion object{
+        val listTrans = ArrayList<ResponseTransactions>()
+    }
 
     private var msg = ""
     override fun onCreateView(
@@ -61,11 +67,21 @@ class TransactionFragment : Fragment(), View.OnClickListener {
     }
 
     private fun showEmptyText() {
-        if(listTrans.size != 0){
-            EmptyTextTransactions.isVisible = false
+        try {
+            if(listTrans.size != 0){
+                EmptyTextTransactions.isVisible = false
+                btnSeeAllTransactions.isEnabled = true
+                btnSeeAllTransactions.setBackgroundResource(R.drawable.header_layout)
+
+            }
+            else{
+                EmptyTextTransactions.isVisible = true
+                btnSeeAllTransactions.isEnabled = false
+                btnSeeAllTransactions.setBackgroundResource(R.drawable.gray_button)
+            }
         }
-        else{
-            EmptyTextTransactions.isVisible = true
+        catch (e:Exception){
+            Log.d("error", "error $e")
         }
     }
 
@@ -78,6 +94,7 @@ class TransactionFragment : Fragment(), View.OnClickListener {
     }
 
     private fun getDataTransactions(){
+        listTrans.clear()
         try {
             RetrofitClientTransactions.instance.getTransactions().enqueue(object :
                 Callback<List<ResponseTransactions>> {
@@ -92,9 +109,14 @@ class TransactionFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun onFailure(call: Call<List<ResponseTransactions>>, t: Throwable) {
-                    Log.d("p2", t.message.toString())
-                    if (t.message == t.message){
-                        Toast.makeText(requireContext(), "Tidak ada koneksi Internet" , Toast.LENGTH_SHORT).show()
+                    try {
+                        Log.d("p2", t.message.toString())
+                        if (t.message == t.message){
+                            Toast.makeText(requireContext(), "Failed to connect to Server" , Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    catch (e:Exception){
+                        Log.d("error", e.message.toString())
                     }
                 }
 
@@ -135,9 +157,6 @@ class TransactionFragment : Fragment(), View.OnClickListener {
     }
 
     private fun showCustomDatePicker() {
-
-
-
         val mDialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_datepicker, null)
         val mBuilder = AlertDialog.Builder(requireContext())
             .setView(mDialogView)
@@ -166,6 +185,8 @@ class TransactionFragment : Fragment(), View.OnClickListener {
                 activity?.onBackPressed()
             }
             R.id.btnSeeAllTransactions -> {
+                val excel = CreateExcel()
+                excel.createExcelSheet(msg)
                 activity?.onBackPressed()
             }
             R.id.FilterButton -> {
