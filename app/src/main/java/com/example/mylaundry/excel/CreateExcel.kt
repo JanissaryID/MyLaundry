@@ -64,6 +64,10 @@ class CreateExcel {
         val format2 = WritableCellFormat(font2)
         format2.alignment = Alignment.CENTRE
 
+        val font3 = WritableFont(WritableFont.ARIAL, 11, WritableFont.BOLD)
+        val format3 = WritableCellFormat(font3)
+        format3.alignment = Alignment.CENTRE
+
         try {
             val listdata: MutableList<TransactionMachine> = ArrayList()
             listdata.add(TransactionMachine(1, "Dryer", 1, "2-2-2022", "12.34","30.000"))
@@ -102,8 +106,9 @@ class CreateExcel {
                 sheet.addCell(Label(4, i + 2, TransactionFragment.listTrans[i].time,format2))
                 sheet.addCell(Label(5, i + 2, TransactionFragment.listTrans[i].price,format2))
             }
-            sheet.mergeCells(0,(TransactionFragment.listTrans.size) + 2,(TransactionFragment.listTrans.size),(TransactionFragment.listTrans.size))
-            sheet.addCell(Label(4, (TransactionFragment.listTrans.size) + 2, "Total",format2))
+            var celllist : Int = TransactionFragment.listTrans.size + 2
+            sheet.mergeCells(0,celllist,(TransactionFragment.listTrans.size),celllist)
+            sheet.addCell(Label(0, celllist, "Total",format3))
 //            Log.d("excel", TransactionFragment.listTrans.size.toString())
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
