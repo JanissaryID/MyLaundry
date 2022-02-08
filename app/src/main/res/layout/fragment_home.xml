@@ -37,64 +37,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/MoneyText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="30dp"
-        android:text="IDR240.000"
-        android:textColor="#000"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/titleLaundryHome" />
-
-
-    <TextView
-        android:id="@+id/RecentTransactions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="20dp"
-        android:text="Recent Transactions"
-        android:textColor="#000"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.004"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/gridLayout" />
-
-    <TextView
-        android:id="@+id/TransactionTrackText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="5dp"
-        android:text="48 Transaction on this Day"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/MoneyText" />
-
     <GridLayout
         android:id="@+id/gridLayout"
         android:layout_width="match_parent"
         android:layout_height="160dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         android:columnCount="2"
         android:rowCount="1"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/TransactionTrackText">
+        app:layout_constraintTop_toBottomOf="@+id/titleLaundryHome">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/CardWasher"
-            android:clickable="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
@@ -104,8 +60,9 @@
             android:layout_marginEnd="7.5dp"
             android:layout_marginBottom="15dp"
             android:backgroundTint="@color/white"
-            app:cardCornerRadius="10dp"
+            android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground"
+            app:cardCornerRadius="10dp"
             app:cardElevation="2dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -186,14 +143,14 @@
             android:layout_height="match_parent"
             android:layout_columnWeight="1"
             android:layout_gravity="fill"
-            android:clickable="true"
             android:layout_marginStart="7.5dp"
             android:layout_marginTop="15dp"
             android:layout_marginEnd="15dp"
             android:layout_marginBottom="15dp"
             android:backgroundTint="@color/white"
-            app:cardCornerRadius="10dp"
+            android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground"
+            app:cardCornerRadius="10dp"
             app:cardElevation="2dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -270,21 +227,6 @@
 
     </GridLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        tools:itemCount="5"
-        tools:listitem="@layout/list_item_transaction"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="15dp"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/RecentTransactions">
-
-    </androidx.recyclerview.widget.RecyclerView>
-
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
@@ -295,7 +237,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/btnSeeAllTransactions"
             style="?android:attr/borderlessButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="48dp"

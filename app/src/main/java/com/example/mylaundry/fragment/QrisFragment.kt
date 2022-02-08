@@ -14,18 +14,21 @@ import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.mylaundry.R
-import com.example.mylaundry.api.generate.GetResponseAPI
-import com.example.mylaundry.api.payment.ResponsePaymentAPI
-import com.example.mylaundry.api.generate.ResponseAPI
-import com.example.mylaundry.api.RetrofitClient
+import com.example.mylaundry.api.machine.ResponseMachine
+import com.example.mylaundry.api.machine.ResponseUpdateMachine
+import com.example.mylaundry.api.machine.RetrofitClientMachine
+import com.example.mylaundry.api.qris.generate.GetResponseAPI
+import com.example.mylaundry.api.qris.payment.ResponsePaymentAPI
+import com.example.mylaundry.api.qris.generate.ResponseAPI
+import com.example.mylaundry.api.qris.RetrofitClient
 import com.example.mylaundry.api.payment.GetResponsePaymentAPI
-import com.example.mylaundry.room.dryermachine.Dryer
-import com.example.mylaundry.room.dryermachine.DryerViewModel
-import com.example.mylaundry.room.washermachine.Washer
-import com.example.mylaundry.room.washermachine.WasherViewModel
-import com.example.mylaundry.socket.Socket
+import com.example.mylaundry.api.transactions.ResponseTransactions
+import com.example.mylaundry.api.transactions.RetrofitClientTransactions
+import com.example.mylaundry.room.transactions.Transactions
+import com.example.mylaundry.room.transactions.TransactionsViewModel
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.*
@@ -36,6 +39,9 @@ import java.io.IOException
 import java.lang.Exception
 import java.net.*
 import java.nio.charset.StandardCharsets
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class QrisFragment : Fragment(), View.OnClickListener {
@@ -54,8 +60,10 @@ class QrisFragment : Fragment(), View.OnClickListener {
 
     private lateinit var CheckImage : ImageView
 
-    private lateinit var mDryerViewModel : DryerViewModel
-    private lateinit var mWasherViewModel : WasherViewModel
+//    private lateinit var mDryerViewModel : DryerViewModel
+//    private lateinit var mWasherViewModel : WasherViewModel
+    private lateinit var mTransactionsViewModel : TransactionsViewModel
+
     private lateinit var uiScope : CoroutineScope
 
 //    private lateinit var socket: Socket
@@ -66,6 +74,8 @@ class QrisFragment : Fragment(), View.OnClickListener {
     private var reffID : Long = 0
     private var successPayment : Boolean = false
     private var GenerateOK : Boolean = false
+
+    private var getData = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -99,10 +109,13 @@ class QrisFragment : Fragment(), View.OnClickListener {
         titleMachine = view.findViewById(R.id.TitleMachineLaundry)
         titleMachine.text = "${args.machineType} : ${args.machineNumber}"
 
-        mDryerViewModel = ViewModelProvider(this).get(DryerViewModel::class.java)
-        mWasherViewModel = ViewModelProvider(this).get(WasherViewModel::class.java)
+//        mDryerViewModel = ViewModelProvider(this).get(DryerViewModel::class.java)
+//        mWasherViewModel = ViewModelProvider(this).get(WasherViewModel::class.java)
+        mTransactionsViewModel = ViewModelProvider(this).get(TransactionsViewModel::class.java)
+
 
         coroutineResponseAPI()
+//        doBackDoor()
 
     }
 
@@ -241,16 +254,6 @@ class QrisFragment : Fragment(), View.OnClickListener {
         var mIDstring = String(decmID)
 
         val QRParameter = ResponseAPI(mIDstring,args.price,0,randomReff,"https://webhook.site/73121a4e-5dd9-423d-980b-0ace6c719b90",5)
-//        val QRParameter = ResponseAPI("210910003000000",args.price,0,randomReff,"https://webhook.site/73121a4e-5dd9-423d-980b-0ace6c719b90",5)
-
-
-
-//        Log.d("checksplit", "ID : $cID")
-//        Log.d("checksplit", "SK : $cSK")
-//        Log.d("checksplit", "mID : $mID")
-//        Log.d("checksplit", "dec ID : $cIDstring")
-//        Log.d("checksplit", "dec SK : $cSKstring")
-//        Log.d("checksplit", "dec mID : $mIDstring")
 
         val code = "${cIDstring}:${cSKstring}:${mIDstring}"
 //        val code = "6a7ba6b1a2e6eaf211bfc87c2ba7b6dc:1acb950632a327bd45638e16c6766bef:210910003000000"
@@ -316,19 +319,19 @@ class QrisFragment : Fragment(), View.OnClickListener {
         QRImage.setImageBitmap(bitmap)
     }
 
-    private fun updateValueMachine(machine:String,id: Int, number : Int){
-//        Log.d("checktitle", "Check title " + machine)
-        val separate = machine.split(" ")[0]
-//        Log.d("checktitle", "Check title " + separate)
-        if(separate == "Washer"){
-            val updatedvalue = Washer(id,number,true)
-            mWasherViewModel.updateWasher(updatedvalue)
-        }
-        else{
-            val updatedvalue = Dryer(id,number,true)
-            mDryerViewModel.updateDryer(updatedvalue)
-        }
-    }
+//    private fun updateValueMachine(machine:String,id: Int, number : Int){
+////        Log.d("checktitle", "Check title " + machine)
+//        val separate = machine.split(" ")[0]
+////        Log.d("checktitle", "Check title " + separate)
+//        if(separate == "Washer"){
+//            val updatedvalue = Washer(id,number,true)
+//            mWasherViewModel.updateWasher(updatedvalue)
+//        }
+//        else{
+//            val updatedvalue = Dryer(id,number,true)
+//            mDryerViewModel.updateDryer(updatedvalue)
+//        }
+//    }
 
     override fun onStop() {
         super.onStop()
@@ -337,63 +340,90 @@ class QrisFragment : Fragment(), View.OnClickListener {
         uiScope.cancel()
     }
 
-    private fun MulticastSocketPrograming(){
-        var HEADER = 0xC8
-        var WASHER = 0x01
-        var DRYER = 0x02
-        var COMMAND = listOf<Int>(0x01,0x0A,0x02,0x10)
-        var DATA = 0x01
-        var myData = ""
-//        var msg = "Hello"
-        var IP_ADDRESS = "224.16.32.110"
-        var PORT = 11968
-
-
-        if (args.machineType == "Dryer Machine"){
-            myData = "$HEADER$DRYER${Integer.toHexString((args.machineNumber))}${COMMAND[0]}$DATA"
-        }
-        else{
-            myData = "$HEADER$WASHER${Integer.toHexString((args.machineNumber))}${COMMAND[0]}$DATA"
-        }
-        
-        try{
-            val msg = "Hello"
-            val group = InetAddress.getByName(IP_ADDRESS)
-            val s = MulticastSocket(PORT)
-            s.joinGroup(group)
-            val bytes = myData.toByteArray(StandardCharsets.UTF_8)
-            val hi = DatagramPacket(
-                bytes, bytes.size,
-                group, PORT
-            )
-            s.send(hi)
-            val buf = ByteArray(1000)
-            val recv = DatagramPacket(buf, buf.size)
-            s.receive(recv)
-            s.leaveGroup(group)
-        }
-        catch (e : SocketException){
-            Log.d("error", "error : " + e)
-        }
-        catch (e : IOException){
-            Log.d("error", "error : " + e)
-        }
-        catch (e : ErrnoException){
-            Log.d("error", "error : " + e)
-        }
+    private fun addTransactions(){
+        val simpleDateFormat = SimpleDateFormat("dd-MM-yyyy")
+        val simpleTimeFormat = SimpleDateFormat("HH:mm:ss")
+        val currentDate: String = simpleDateFormat.format(Date())
+        val currentTime: String = simpleTimeFormat.format(Date())
+        val transactions = Transactions(
+            typeMachine = args.machineType.toString(),
+            noMachine = args.machineNumber,
+            date =currentDate,
+            timeMachine = currentTime,
+            priceMachine = args.price
+        )
+        mTransactionsViewModel.addTransactions(transactions)
     }
 
-    private fun doBackDoor(){
-        uiScope.launch {
-            withContext(Dispatchers.IO) {
+    private fun rentMachine(){
 
-                MulticastSocketPrograming()
+        val bodyUpdate = ResponseUpdateMachine(true)
 
-                withContext(Dispatchers.Main){
+        RetrofitClientMachine.instance.putMachine(args.machineId, bodyUpdate).enqueue(object : Callback<ResponseUpdateMachine> {
+            override fun onResponse(call: Call<ResponseUpdateMachine>, response: Response<ResponseUpdateMachine>) {
+                Log.d("retrofitput", args.machineId.toString())
+                Log.d("retrofitput", response.code().toString())
+                Log.d("retrofitput", response.body().toString())
 
+//                BtnOnMachine.isEnabled =false
+
+                insertTransactions()
+
+            }
+
+            override fun onFailure(call: Call<ResponseUpdateMachine>, t: Throwable) {
+                Log.d("error", t.message.toString())
+                if (t.message == t.message){
+
+//                    BtnOnMachine.isEnabled =true
+
+                    Toast.makeText(requireContext(), "Tidak ada koneksi Internet" , Toast.LENGTH_SHORT).show()
                 }
             }
-        }
+        })
+    }
+
+    private fun insertTransactions(){
+
+        val current = LocalDateTime.now()
+
+        val formatDay = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+        val date = current.format(formatDay)
+
+        val formatTime = DateTimeFormatter.ofPattern("HH:mm")
+        val time = current.format(formatTime)
+
+        val bodyUpdate = ResponseTransactions(
+            date,
+            args.machineNumber,
+            args.price.toString(),
+            time,
+            args.machineType
+        )
+
+        RetrofitClientTransactions.instance.insertTransactions(bodyUpdate).enqueue(object : Callback<ResponseTransactions> {
+            override fun onResponse(call: Call<ResponseTransactions>, response: Response<ResponseTransactions>) {
+                Log.d("retrofitinsert", args.machineId.toString())
+//                Log.d("retrofitinsert", response.)
+                Log.d("retrofitinsert", response.code().toString())
+                Log.d("retrofitinsert", response.body().toString())
+
+//                BtnOnMachine.isEnabled =false
+
+                findNavController().navigate(R.id.action_qrisFragment_to_homeFragment)
+
+            }
+
+            override fun onFailure(call: Call<ResponseTransactions>, t: Throwable) {
+                Log.d("error", t.message.toString())
+                if (t.message == t.message){
+
+//                    BtnOnMachine.isEnabled =true
+
+                    Toast.makeText(requireContext(), "Tidak ada koneksi Internet" , Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
     }
 
     override fun onClick(p0: View?) {
@@ -404,8 +434,10 @@ class QrisFragment : Fragment(), View.OnClickListener {
                 activity?.onBackPressed()
             }
             R.id.ButtonOn -> {
-//                dataUDP()
-                doBackDoor()
+                rentMachine()
+//                BtnOnMachine.isEnabled =false
+
+//                Toast.makeText(requireContext(), "Reveived Data : ${SocketPrograming.getData}" , Toast.LENGTH_SHORT).show()
 
 //                successPayment = false
 //                GenerateOK = false
@@ -420,6 +452,4 @@ class QrisFragment : Fragment(), View.OnClickListener {
             }
         }
     }
-
-
 }

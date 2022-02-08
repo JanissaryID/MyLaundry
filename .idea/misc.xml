@@ -12,16 +12,20 @@
         <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/drawable/machine_running.xml" value="0.1" />
         <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/drawable/selected_machine.xml" value="0.1" />
         <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/layout/activity_main.xml" value="0.12771739130434784" />
+        <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/layout/dialog_datepicker.xml" value="0.1875" />
         <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/layout/dialog_login.xml" value="0.25" />
         <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/layout/dialog_login2.xml" value="0.16032608695652173" />
         <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/layout/fragment_edit.xml" value="0.22" />
         <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/layout/fragment_home.xml" value="0.25" />
         <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/layout/fragment_list_machine.xml" value="0.22" />
         <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/layout/fragment_qris.xml" value="0.22" />
-        <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/layout/fragment_setting.xml" value="0.19384057971014493" />
+        <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/layout/fragment_setting.xml" value="0.5" />
+        <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/layout/fragment_transaction.xml" value="0.33" />
+        <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/layout/list_item_image_transaction.xml" value="0.18" />
         <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/layout/list_item_machine.xml" value="0.33" />
         <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/layout/list_item_setting.xml" value="0.19384057971014493" />
         <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/layout/list_item_transaction.xml" value="0.1" />
+        <entry key="..\:/Users/Krisn/AndroidStudioProjects/MyLaundry/app/src/main/res/layout/list_item_transactions.xml" value="0.33" />
       </map>
     </option>
   </component>

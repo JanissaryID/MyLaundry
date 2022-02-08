@@ -52,12 +52,6 @@ class SettingFragment : Fragment(), View.OnClickListener {
         rvSetting = view.findViewById(R.id.rvsetting)
         rvSetting.setHasFixedSize(true)
 
-//        titleLaundry = view.findViewById(R.id.titleLaundrySetting)
-
-
-
-
-//        list.addAll(SettingData.listData)
         showRecyclerList()
         if (!passStat){
             showCustomLogin()
