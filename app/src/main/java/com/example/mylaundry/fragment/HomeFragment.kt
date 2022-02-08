@@ -133,12 +133,14 @@ class HomeFragment : Fragment(), View.OnClickListener {
         uiScopeget.launch {
             withContext(Dispatchers.IO) {
                 while (true){
-                    try {
-                        Thread.sleep(10000L)
-                        getdataMachine()
-                    }
-                    catch (e: Exception){
-                        Log.d("check", e.toString())
+                    if((ipvar != "") && (portvar != "")){
+                        try {
+                            Thread.sleep(5000L)
+                            getdataMachine()
+                        }
+                        catch (e: Exception){
+                            Log.d("check", e.toString())
+                        }
                     }
                 }
             }
@@ -163,15 +165,16 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     private fun getdataMachine()
     {
-        ListMachine.listWasher.clear()
-        ListMachine.listDryer.clear()
-        ListMachine.listMachine.clear()
-        ListMachine.listDryerUse.clear()
-        ListMachine.listWasherUse.clear()
-
         try {
             RetrofitClientMachine.instance.getMachine().enqueue(object : Callback<List<ResponseMachine>> {
                 override fun onResponse(call: Call<List<ResponseMachine>>, response: Response<List<ResponseMachine>>) {
+
+                    ListMachine.listWasher.clear()
+                    ListMachine.listDryer.clear()
+                    ListMachine.listMachine.clear()
+                    ListMachine.listDryerUse.clear()
+                    ListMachine.listWasherUse.clear()
+
                     Log.d("retrofit", "Code : ${response.code().toString()}")
 //                Log.d("retrofit", "Code : ${response.body().toString()}")
                     response.body()?.let {
@@ -198,10 +201,9 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 override fun onFailure(call: Call<List<ResponseMachine>>, t: Throwable) {
                     Log.d("p2", t.message.toString())
                     if (t.message == t.message){
-                        Toast.makeText(requireContext(), "Tidak ada koneksi Internet" , Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Failed connect to server" , Toast.LENGTH_SHORT).show()
                     }
                 }
-
             })
         }
         catch (e : Exception){
@@ -218,6 +220,8 @@ class HomeFragment : Fragment(), View.OnClickListener {
             DryerMachineAvailabe.isVisible = false
             progressWasher.isVisible = true
             progressDryer.isVisible = true
+            cardDryer.isEnabled = false
+            cardWasher.isEnabled = false
         }
         else{
             titleAvailableWash.isVisible = true
@@ -228,6 +232,8 @@ class HomeFragment : Fragment(), View.OnClickListener {
             progressDryer.isVisible = false
             WasherMachineAvailabe.text = "${ListMachine.listWasher.size-ListMachine.listWasherUse.size} Machine"
             DryerMachineAvailabe.text = "${ListMachine.listDryer.size-ListMachine.listDryerUse.size} Machine"
+            cardDryer.isEnabled = true
+            cardWasher.isEnabled = true
         }
     }
 
@@ -316,7 +322,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 }
             }
         }
-//        getdataMachine()
     }
 
     override fun onClick(p0: View?) {
@@ -336,7 +341,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 findNavController().navigate(R.id.action_homeFragment_to_transactionFragment)
 //                val excel = CreateExcel()
 //                excel.createExcelSheet()
-//                Toast.makeText(requireContext(), "Tidak ada koneksi Internet" , Toast.LENGTH_SHORT).show()
             }
         }
     }

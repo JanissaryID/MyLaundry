@@ -63,7 +63,14 @@ class TransactionFragment : Fragment(), View.OnClickListener {
         FilterButton.setOnClickListener(this)
         btnSeeAllTransactions.setOnClickListener(this)
 
-        getDataTransactions()
+        if((HomeFragment.ipvar != "") && (HomeFragment.portvar != "")){
+            try {
+                getDataTransactions()
+            }
+            catch (e: Exception){
+                Log.d("check", e.toString())
+            }
+        }
     }
 
     private fun showEmptyText() {
