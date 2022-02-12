@@ -339,8 +339,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
             }
             R.id.btnSeeAllTransactions -> {
                 findNavController().navigate(R.id.action_homeFragment_to_transactionFragment)
-//                val excel = CreateExcel()
-//                excel.createExcelSheet()
             }
         }
     }
