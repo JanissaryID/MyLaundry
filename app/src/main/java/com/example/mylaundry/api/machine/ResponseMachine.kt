@@ -13,11 +13,17 @@ data class ResponseMachine(
 	@field:SerializedName("machine_status")
 	val machineStatus: Boolean? = null,
 
+	@field:SerializedName("machine_price")
+	val machinePrice: String? = null,
+
 	@field:SerializedName("machine_number")
 	val machineNumber: Int? = null,
 
 	@field:SerializedName("machine_id")
 	val machineId: Int? = null,
+
+	@field:SerializedName("machine_grade")
+	val machineGrade: Boolean? = null,
 
 	@field:SerializedName("id")
 	val id: Int? = null

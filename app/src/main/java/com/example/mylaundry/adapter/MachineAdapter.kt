@@ -16,7 +16,7 @@ class MachineAdapter(private val listMachine: ArrayList<ResponseMachine>, price:
 
     private var selectedItem = -1
 
-    private var priceMachine = price
+//    private var priceMachine = price
 
     inner class ListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var tvNumber: TextView = itemView.findViewById(R.id.NumberMachine)
@@ -31,16 +31,16 @@ class MachineAdapter(private val listMachine: ArrayList<ResponseMachine>, price:
     }
 
     override fun onBindViewHolder(holder: MachineAdapter.ListViewHolder, position: Int) {
-        val dryer = listMachine[position]
+        val machineLaundry = listMachine[position]
 
-        if(dryer.machineStatus == true){
+        if(machineLaundry.machineStatus == true){
             holder.tvNumber.text = "On"
             holder.tvNumber.setTextColor(Color.WHITE)
             holder.tvNumber.setBackgroundResource(R.drawable.machine_running)
             holder.tvNumber.isEnabled = false
         }
         else{
-            holder.tvNumber.text = dryer.machineNumber.toString()
+            holder.tvNumber.text = machineLaundry.machineNumber.toString()
 
             ListMachine.statButton = false
             holder.tvNumber.setBackgroundResource(R.drawable.header_layout)
@@ -55,7 +55,7 @@ class MachineAdapter(private val listMachine: ArrayList<ResponseMachine>, price:
 
 
         holder.itemView.setOnClickListener{
-            if(dryer.machineStatus == false){
+            if(machineLaundry.machineStatus == false){
                 val previousItem = selectedItem
                 selectedItem = position
 
@@ -64,14 +64,14 @@ class MachineAdapter(private val listMachine: ArrayList<ResponseMachine>, price:
                 ListMachine.statButton = true
 
                 val home = ListMachine()
-                home.buttonStat(ListMachine.buttonCheckoutMachine, priceMachine)
+//                home.buttonStat(ListMachine.buttonCheckoutMachine, priceMachine)
+                home.buttonStat(ListMachine.buttonCheckoutMachine, machineLaundry.machinePrice!!)
 
                 ListMachine.idMachine = listMachine[position].id!!
                 ListMachine.number = listMachine[position].machineNumber!!
 
                 Log.d("checkButton", ListMachine.statButton.toString())
             }
-
         }
     }
 

@@ -60,16 +60,9 @@ class QrisFragment : Fragment(), View.OnClickListener {
 
     private lateinit var CheckImage : ImageView
 
-//    private lateinit var mDryerViewModel : DryerViewModel
-//    private lateinit var mWasherViewModel : WasherViewModel
     private lateinit var mTransactionsViewModel : TransactionsViewModel
 
     private lateinit var uiScope : CoroutineScope
-
-//    private lateinit var socket: Socket
-//    private lateinit var socket: MulticastSocket
-//    private lateinit var group: InetAddress
-//    private lateinit var datagramPacket: DatagramPacket
 
     private var reffID : Long = 0
     private var successPayment : Boolean = false
@@ -98,6 +91,7 @@ class QrisFragment : Fragment(), View.OnClickListener {
 
         BtnCheck = view.findViewById(R.id.ButtonCheck)
         BtnCheck.setOnClickListener(this)
+        BtnCheck.isVisible = false
 
         QRImage = view.findViewById(R.id.QRcodeImage)
 
@@ -126,7 +120,7 @@ class QrisFragment : Fragment(), View.OnClickListener {
 
         uiScope.launch {
             withContext(Dispatchers.IO) {
-//                getQRcode()
+                getQRcode()
                 while(!successPayment){
                     if(GenerateOK){
                         try {
@@ -178,13 +172,24 @@ class QrisFragment : Fragment(), View.OnClickListener {
         var cSK = HomeFragment.clientSKvar
         var mID = HomeFragment.merchantIDvar
 
-        var deccID = Base64.getDecoder().decode(cID)
-        var deccSK = Base64.getDecoder().decode(cSK)
-        var decmID = Base64.getDecoder().decode(mID)
+        var cIDstring : String = ""
+        var cSKstring : String = ""
+        var mIDstring : String = ""
 
-        var cIDstring = String(deccID)
-        var cSKstring = String(deccSK)
-        var mIDstring = String(decmID)
+        Log.d("qrstring", "Var : $cID" )
+        Log.d("qrstring", "Var : $cSK" )
+        Log.d("qrstring", "Var : $mID" )
+
+        try {
+            if ((cID != "") && (cSK != "") && (mID != "")){
+                cIDstring = String(Base64.getDecoder().decode(cID))
+                cSKstring = String(Base64.getDecoder().decode(cSK))
+                mIDstring = String(Base64.getDecoder().decode(mID))
+            }
+        }
+        catch ( e : Exception){
+            Log.d("QrCode", "Error Convert Code : ${e.message}")
+        }
 
         val code = "${cIDstring}:${cSKstring}:${mIDstring}"
 //        val code = "6a7ba6b1a2e6eaf211bfc87c2ba7b6dc:1acb950632a327bd45638e16c6766bef:210910003000000"
@@ -198,7 +203,7 @@ class QrisFragment : Fragment(), View.OnClickListener {
                 call: Call<GetResponsePaymentAPI>,
                 response: Response<GetResponsePaymentAPI>
             ) {
-                Log.d("checksplit", "code Encode Response : $encodedString")
+//                Log.d("checksplit", "code Encode Response : $encodedString")
                 if (response.code() == 200) {
 //                    Log.d("checkrefid", "Response 200 OK")
                     if (response.body()?.status == "success"){
@@ -245,13 +250,24 @@ class QrisFragment : Fragment(), View.OnClickListener {
         var cSK = HomeFragment.clientSKvar
         var mID = HomeFragment.merchantIDvar
 
-        var deccID = Base64.getDecoder().decode(cID)
-        var deccSK = Base64.getDecoder().decode(cSK)
-        var decmID = Base64.getDecoder().decode(mID)
+        var cIDstring : String = ""
+        var cSKstring : String = ""
+        var mIDstring : String = ""
 
-        var cIDstring = String(deccID)
-        var cSKstring = String(deccSK)
-        var mIDstring = String(decmID)
+        Log.d("qrstring", "Var : $cID" )
+        Log.d("qrstring", "Var : $cSK" )
+        Log.d("qrstring", "Var : $mID" )
+
+        try {
+            if ((cID != "") && (cSK != "") && (mID != "")){
+                cIDstring = String(Base64.getDecoder().decode(cID))
+                cSKstring = String(Base64.getDecoder().decode(cSK))
+                mIDstring = String(Base64.getDecoder().decode(mID))
+            }
+        }
+        catch ( e : Exception){
+            Log.d("QrCode", "Error Convert Code : ${e.message}")
+        }
 
         val QRParameter = ResponseAPI(mIDstring,args.price,0,randomReff,"https://webhook.site/73121a4e-5dd9-423d-980b-0ace6c719b90",5)
 
@@ -265,7 +281,7 @@ class QrisFragment : Fragment(), View.OnClickListener {
                     call: Call<GetResponseAPI>,
                     response: Response<GetResponseAPI>
                 ) {
-                    Log.d("checksplit", "code Encode : $encodedString")
+//                    Log.d("checksplit", "code Encode : $encodedString")
                     showLoading(true)
                     if (response.code() == 200) {
                         if (response.body()?.status == "success"){
